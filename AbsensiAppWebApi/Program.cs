@@ -1,11 +1,5 @@
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace AbsensiAppWebApi
 {
@@ -20,10 +14,6 @@ namespace AbsensiAppWebApi
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    var port = Environment.GetEnvironmentVariable("PORT");
-
-                    webBuilder.UseUrls($"http://+:{port}");
-
                     webBuilder.UseStartup<Startup>();
                 });
     }
