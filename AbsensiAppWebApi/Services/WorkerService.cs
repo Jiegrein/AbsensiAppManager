@@ -23,7 +23,7 @@ namespace AbsensiAppWebApi.Services
         /// <returns></returns>
         public async Task<Worker> CreateWorker(WorkerModel model)
         {
-            var id = Guid.NewGuid();
+            var id = new Guid(model.Id);
 
             var newWorker = new Worker()
             {
@@ -31,7 +31,7 @@ namespace AbsensiAppWebApi.Services
                 Fullname = model.Fullname,
                 Name = model.Name,
                 WorkStatus = false,
-                CreatedAt = DateTime.Now                
+                CreatedAt = DateTime.Now
             };
 
             Db.Workers.Add(newWorker);
