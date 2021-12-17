@@ -25,6 +25,8 @@ namespace AbsensiAppWebApi.DB.Entities
         public string Name { get; set; }
         [Column("work_status")]
         public bool? WorkStatus { get; set; }
+        [Column("break_status")]
+        public bool? BreakStatus { get; set; }
         [Column("created_at", TypeName = "timestamp with time zone")]
         public DateTime CreatedAt { get; set; }
         [Column("updated_at", TypeName = "timestamp with time zone")]

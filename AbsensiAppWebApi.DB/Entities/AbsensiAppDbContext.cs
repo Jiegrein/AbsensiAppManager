@@ -12,6 +12,7 @@ namespace AbsensiAppWebApi.DB.Entities
             : base(options)
         {
         }
+
         public virtual DbSet<Blob> Blobs { get; set; }
         public virtual DbSet<Project> Projects { get; set; }
         public virtual DbSet<ScanEnum> ScanEnums { get; set; }

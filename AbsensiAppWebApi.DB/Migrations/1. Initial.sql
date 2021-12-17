@@ -3,6 +3,7 @@
     fullname TEXT,
     name TEXT,
     work_status boolean,
+	break_status boolean,
 	created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMPTZ,
 
