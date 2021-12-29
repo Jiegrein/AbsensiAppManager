@@ -124,8 +124,8 @@ namespace AbsensiAppWebApi.Services
         {
             var name = await GetWorkerName(model.WorkerId);
 
-            var log = new Guid(logId);
-            var workerId = new Guid(model.WorkerId);
+            var log = Guid.Parse(logId);
+            var workerId = Guid.Parse(model.WorkerId);
 
             var workerLog = await Db.WorkerLogs
                 .Where(Q => Q.LogId == log)
