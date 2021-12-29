@@ -31,6 +31,7 @@ namespace AbsensiAppWebApi.Services
                 Fullname = model.Fullname,
                 Name = model.Name,
                 WorkStatus = false,
+                BreakStatus = false,
                 CreatedAt = DateTime.Now
             };
 
@@ -59,7 +60,7 @@ namespace AbsensiAppWebApi.Services
 
                 return workerDetail;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine(e);
             }
@@ -79,21 +80,30 @@ namespace AbsensiAppWebApi.Services
                 .Select(Q => Q.Id)
                 .FirstOrDefaultAsync();
 
-            if (scanId == (int)AbsensiAppWebApi.DB.Enums.ScanEnums.StartWork)
+            if (scanId == (int)DB.Enums.ScanEnums.StartWork)
             {
                 var name = await GetWorkerName(model.WorkerId);
 
                 var logId = Guid.NewGuid();
 
+                var workerId = new Guid(model.WorkerId);
+
                 var workerLog = new WorkerLog()
                 {
                     LogId = logId,
-                    WorkerId = new Guid(model.WorkerId),
+                    WorkerId = workerId,
                     StartWork = DateTime.Now,
                     ProjectId = new Guid(model.ProjectId),
                     CreatedAt = DateTime.Now,
                     CreatedBy = name,
                 };
+
+                var worker = await Db.Workers
+                    .Where(Q => Q.Id == workerId)
+                    .Select(Q => Q)
+                    .FirstOrDefaultAsync();
+
+                worker.WorkStatus = true;
 
                 Db.Add(workerLog);
 
@@ -115,6 +125,7 @@ namespace AbsensiAppWebApi.Services
             var name = await GetWorkerName(model.WorkerId);
 
             var log = new Guid(logId);
+            var workerId = new Guid(model.WorkerId);
 
             var workerLog = await Db.WorkerLogs
                 .Where(Q => Q.LogId == log)
@@ -129,17 +140,31 @@ namespace AbsensiAppWebApi.Services
             {
                 var date = DateTime.Now;
 
-                if(scanId == (int)AbsensiAppWebApi.DB.Enums.ScanEnums.StartBreak)
+                var worker = await Db.Workers
+                    .Where(Q => Q.Id == workerId)
+                    .Select(Q => Q)
+                    .FirstOrDefaultAsync();
+
+                if (scanId == (int)DB.Enums.ScanEnums.StartBreak)
                 {
                     workerLog.StartBreak = date;
+
+                    worker.WorkStatus = true;
+                    worker.BreakStatus = true;
                 }
-                else if (scanId == (int)AbsensiAppWebApi.DB.Enums.ScanEnums.EndBreak)
+                else if (scanId == (int)DB.Enums.ScanEnums.EndBreak)
                 {
                     workerLog.EndBreak = date;
+
+                    worker.WorkStatus = true;
+                    worker.BreakStatus = false;
                 }
-                else if (scanId == (int)AbsensiAppWebApi.DB.Enums.ScanEnums.EndWork)
+                else if (scanId == (int)DB.Enums.ScanEnums.EndWork)
                 {
                     workerLog.EndWork = date;
+
+                    worker.WorkStatus = false;
+                    worker.BreakStatus = false;
                 }
                 else return false;
 

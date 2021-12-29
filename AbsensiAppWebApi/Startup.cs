@@ -29,14 +29,14 @@ namespace AbsensiAppWebApi
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "AbesensiAppWebApi", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "AbsensiAppWebApi", Version = "v1" });
             });
 
             services.AddTransient<WorkerService>();
 
             services.AddDbContext<AbsensiAppDbContext>(options =>
             {
-                var connectionString = IsDevelopment ? this.Configuration.GetConnectionString(nameof(AppSettings.ConnectionStrings.AbsensiAppDb)) : GetHerokuConnectionString();
+                var connectionString = GetHerokuConnectionString();
                 options.UseNpgsql(connectionString);
             }, ServiceLifetime.Transient);
         }
@@ -66,6 +66,8 @@ namespace AbsensiAppWebApi
         private static string GetHerokuConnectionString()
         {
             string connectionUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+
+            if (string.IsNullOrEmpty(connectionUrl)) connectionUrl = "postgres://aseolmilqgztib:dc36d07aa7fe8fcbcd87248331a58c7382d40c80e2e5cb7effa40f7f318152ca@ec2-35-173-111-183.compute-1.amazonaws.com:5432/d130msijlgh7jd";
 
             var databaseUri = new Uri(connectionUrl);
 
