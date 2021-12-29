@@ -67,7 +67,7 @@ namespace AbsensiAppWebApi
         {
             string connectionUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
 
-            if (string.IsNullOrEmpty(connectionUrl)) connectionUrl = "postgres://aseolmilqgztib:dc36d07aa7fe8fcbcd87248331a58c7382d40c80e2e5cb7effa40f7f318152ca@ec2-35-173-111-183.compute-1.amazonaws.com:5432/d130msijlgh7jd";
+            if (string.IsNullOrEmpty(connectionUrl)) connectionUrl = "postgres://cuvejkbizdadte:0cb099653da77d31cf29b128c847a2491cb1d59004d528a8a5ad909dd2d380a0@ec2-184-73-216-48.compute-1.amazonaws.com:5432/d23g2kar9be7cb";
 
             var databaseUri = new Uri(connectionUrl);
 
