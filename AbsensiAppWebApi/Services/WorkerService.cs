@@ -73,7 +73,7 @@ namespace AbsensiAppWebApi.Services
         /// </summary>
         /// <param name="workerId"></param>
         /// <returns></returns>
-        public async Task<(bool, string)> CreateWorkerLog(WorkerLogModel model)
+        public async Task<string> CreateWorkerLog(WorkerLogModel model)
         {
             var scanId = await Db.ScanEnums
                 .Where(Q => Q.Id == model.ScanEnumId)
@@ -109,10 +109,10 @@ namespace AbsensiAppWebApi.Services
 
                 await Db.SaveChangesAsync();
 
-                return (true, logId.ToString());
+                return logId.ToString();
             }
 
-            return (false, "");
+            return "";
         }
 
         /// <summary>

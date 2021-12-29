@@ -41,11 +41,11 @@ namespace AbsensiAppWebApi.API
 
         // POST api/<WorkerAPI>
         [HttpPost("create-log")]
-        public async Task<(bool, string)> CreateWorkerLog([FromBody] WorkerLogModel model)
+        public async Task<string> CreateWorkerLog([FromBody] WorkerLogModel model)
         {
-            var (isSuccess, logId) = await WorkerService.CreateWorkerLog(model);
+            var logId = await WorkerService.CreateWorkerLog(model);
 
-            return (isSuccess, logId);
+            return logId;
         }
 
         // PUT api/<WorkerAPI>/5
