@@ -86,7 +86,7 @@ namespace AbsensiAppWebApi.Services
 
                 var now = DateTime.Now;
 
-                var logId = now.ToString("yyyyMMddHHmmdd");
+                var logId = now.ToString("ddddyyyyMMddHHmmdd");
 
                 var workerId = new Guid(model.WorkerId);
 
