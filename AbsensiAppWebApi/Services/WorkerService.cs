@@ -84,7 +84,9 @@ namespace AbsensiAppWebApi.Services
             {
                 var name = await GetWorkerName(model.WorkerId);
 
-                var logId = DateTime.Now.ToString("yyyyMMddHHmmdd");
+                var now = DateTime.Now;
+
+                var logId = now.ToString("yyyyMMddHHmmdd");
 
                 var workerId = new Guid(model.WorkerId);
 
@@ -92,9 +94,9 @@ namespace AbsensiAppWebApi.Services
                 {
                     LogId = logId,
                     WorkerId = workerId,
-                    StartWork = DateTime.Now,
+                    StartWork = now,
                     ProjectId = new Guid(model.ProjectId),
-                    CreatedAt = DateTime.Now,
+                    CreatedAt = now,
                     CreatedBy = name,
                 };
 
@@ -136,7 +138,7 @@ namespace AbsensiAppWebApi.Services
 
             if (workerLog != null)
             {
-                var date = DateTime.Now;
+                var now = DateTime.Now;
 
                 var worker = await Db.Workers
                     .Where(Q => Q.Id == workerId)
@@ -145,28 +147,28 @@ namespace AbsensiAppWebApi.Services
 
                 if (scanId == (int)DB.Enums.ScanEnums.StartBreak)
                 {
-                    workerLog.StartBreak = date;
+                    workerLog.StartBreak = now;
 
                     worker.WorkStatus = true;
                     worker.BreakStatus = true;
                 }
                 else if (scanId == (int)DB.Enums.ScanEnums.EndBreak)
                 {
-                    workerLog.EndBreak = date;
+                    workerLog.EndBreak = now;
 
                     worker.WorkStatus = true;
                     worker.BreakStatus = false;
                 }
                 else if (scanId == (int)DB.Enums.ScanEnums.EndWork)
                 {
-                    workerLog.EndWork = date;
+                    workerLog.EndWork = now;
 
                     worker.WorkStatus = false;
                     worker.BreakStatus = false;
                 }
                 else return false;
 
-                workerLog.UpdatedAt = date;
+                workerLog.UpdatedAt = now;
                 workerLog.UpdatedBy = name;
                 Db.Update(workerLog);
                 await Db.SaveChangesAsync();
