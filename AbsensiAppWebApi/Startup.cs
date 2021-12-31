@@ -36,7 +36,10 @@ namespace AbsensiAppWebApi
 
             services.AddDbContext<AbsensiAppDbContext>(options =>
             {
-                var connectionString = IsDevelopment ? this.Configuration.GetConnectionString(nameof(AppSettings.ConnectionStrings.AbsensiAppDb)) : GetHerokuConnectionString();
+                //Localhost
+                //var connectionString = IsDevelopment ? this.Configuration.GetConnectionString(nameof(AppSettings.ConnectionStrings.AbsensiAppDb)) : GetHerokuConnectionString();
+                //Heroku
+                var connectionString = GetHerokuConnectionString();
                 options.UseNpgsql(connectionString);
             }, ServiceLifetime.Transient);
         }
