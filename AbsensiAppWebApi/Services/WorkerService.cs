@@ -127,9 +127,8 @@ namespace AbsensiAppWebApi.Services
             var log = Guid.Parse(logId);
             var workerId = Guid.Parse(model.WorkerId);
 
-            var workerLog = await Db.WorkerLogs
-                .Where(Q => Q.LogId == log)
-                .FirstOrDefaultAsync();
+            // Using Raw since Heroku hates UUID
+            var workerLog = await Db.WorkerLogs.FromSqlRaw("SELECT * FROM worker_log WHERE log_id::text = {0}", logId).FirstOrDefaultAsync();
 
             var scanId = await Db.ScanEnums
                 .Where(Q => Q.Id == model.ScanEnumId)
