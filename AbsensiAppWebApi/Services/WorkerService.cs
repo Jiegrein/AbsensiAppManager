@@ -84,7 +84,9 @@ namespace AbsensiAppWebApi.Services
             {
                 var name = await GetWorkerName(model.WorkerId);
 
-                var logId = Guid.NewGuid();
+                var now = DateTime.Now;
+
+                var logId = now.ToString("yyyyMMddHHmmdd");
 
                 var workerId = new Guid(model.WorkerId);
 
@@ -92,9 +94,9 @@ namespace AbsensiAppWebApi.Services
                 {
                     LogId = logId,
                     WorkerId = workerId,
-                    StartWork = DateTime.Now,
+                    StartWork = now,
                     ProjectId = new Guid(model.ProjectId),
-                    CreatedAt = DateTime.Now,
+                    CreatedAt = now,
                     CreatedBy = name,
                 };
 
@@ -124,11 +126,10 @@ namespace AbsensiAppWebApi.Services
         {
             var name = await GetWorkerName(model.WorkerId);
 
-            var log = Guid.Parse(logId);
             var workerId = Guid.Parse(model.WorkerId);
 
-            // Using Raw since Heroku hates UUID
-            var workerLog = await Db.WorkerLogs.FromSqlRaw("SELECT * FROM worker_log WHERE log_id::text = {0}", logId).FirstOrDefaultAsync();
+            var workerLog = await Db.WorkerLogs
+                .Where(Q => Q.LogId == logId).FirstOrDefaultAsync();
 
             var scanId = await Db.ScanEnums
                 .Where(Q => Q.Id == model.ScanEnumId)
@@ -137,7 +138,7 @@ namespace AbsensiAppWebApi.Services
 
             if (workerLog != null)
             {
-                var date = DateTime.Now;
+                var now = DateTime.Now;
 
                 var worker = await Db.Workers
                     .Where(Q => Q.Id == workerId)
@@ -146,28 +147,28 @@ namespace AbsensiAppWebApi.Services
 
                 if (scanId == (int)DB.Enums.ScanEnums.StartBreak)
                 {
-                    workerLog.StartBreak = date;
+                    workerLog.StartBreak = now;
 
                     worker.WorkStatus = true;
                     worker.BreakStatus = true;
                 }
                 else if (scanId == (int)DB.Enums.ScanEnums.EndBreak)
                 {
-                    workerLog.EndBreak = date;
+                    workerLog.EndBreak = now;
 
                     worker.WorkStatus = true;
                     worker.BreakStatus = false;
                 }
                 else if (scanId == (int)DB.Enums.ScanEnums.EndWork)
                 {
-                    workerLog.EndWork = date;
+                    workerLog.EndWork = now;
 
                     worker.WorkStatus = false;
                     worker.BreakStatus = false;
                 }
                 else return false;
 
-                workerLog.UpdatedAt = date;
+                workerLog.UpdatedAt = now;
                 workerLog.UpdatedBy = name;
                 Db.Update(workerLog);
                 await Db.SaveChangesAsync();

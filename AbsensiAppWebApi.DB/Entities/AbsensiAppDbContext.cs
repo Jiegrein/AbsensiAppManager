@@ -52,16 +52,12 @@ namespace AbsensiAppWebApi.DB.Entities
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
                 entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                entity.Property(e => e.UpdatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
             });
 
             modelBuilder.Entity<WorkerLog>(entity =>
             {
                 entity.HasKey(e => e.LogId)
                     .HasName("pk_worker_log");
-
-                entity.Property(e => e.LogId).ValueGeneratedNever();
 
                 entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
 

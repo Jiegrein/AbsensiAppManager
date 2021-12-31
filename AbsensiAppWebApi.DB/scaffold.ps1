@@ -1,6 +1,6 @@
 $dataSource = "localhost";
 $port = "5432";
-$initialCatalog = "1. HerokuScaffold4";
+$initialCatalog = "1. Heroku";
 $userId = "postgres";
 $password = "admin";
 $provider = "Npgsql.EntityFrameworkCore.PostgreSQL";

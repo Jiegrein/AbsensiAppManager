@@ -13,7 +13,7 @@ namespace AbsensiAppWebApi.DB.Entities
     {
         [Key]
         [Column("log_id")]
-        public Guid LogId { get; set; }
+        public string LogId { get; set; }
         [Column("worker_id")]
         public Guid? WorkerId { get; set; }
         [Column("start_work", TypeName = "timestamp with time zone")]
