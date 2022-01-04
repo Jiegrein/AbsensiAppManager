@@ -122,80 +122,61 @@ namespace AbsensiAppWebApi.Services
         /// </summary>
         /// <param name="workerId"></param>
         /// <returns></returns>
-        public async Task<string> UpdateWorkerLog(string logId, WorkerLogModel model)
+        public async Task<bool> UpdateWorkerLog(string logId, WorkerLogModel model)
         {
             var name = await GetWorkerName(model.WorkerId);
 
             var workerId = Guid.Parse(model.WorkerId);
 
-            var workerLog = new WorkerLog();
+            var workerLog = await Db.WorkerLogs
+                .Where(Q => Q.LogId == logId).FirstOrDefaultAsync();
 
-            try
-            {
-                var workerLog1 = await Db.WorkerLogs
-                    .Where(Q => Q.LogId == logId).FirstOrDefaultAsync();
-
-                workerLog = workerLog1;
-            }
-            catch (Exception)
-            {
-                return "stop at getting log";
-            }
-
-            try
-            {
-                var scanId = await Db.ScanEnums
+            var scanId = await Db.ScanEnums
                 .Where(Q => Q.Id == model.ScanEnumId)
                 .Select(Q => Q.Id)
                 .FirstOrDefaultAsync();
 
-                if (workerLog != null)
-                {
-                    var now = DateTime.Now;
-
-                    var worker = await Db.Workers
-                        .Where(Q => Q.Id == workerId)
-                        .Select(Q => Q)
-                        .FirstOrDefaultAsync();
-
-                    if (scanId == (int)DB.Enums.ScanEnums.StartBreak)
-                    {
-                        workerLog.StartBreak = now;
-
-                        worker.WorkStatus = true;
-                        worker.BreakStatus = true;
-                    }
-                    else if (scanId == (int)DB.Enums.ScanEnums.EndBreak)
-                    {
-                        workerLog.EndBreak = now;
-
-                        worker.WorkStatus = true;
-                        worker.BreakStatus = false;
-                    }
-                    else if (scanId == (int)DB.Enums.ScanEnums.EndWork)
-                    {
-                        workerLog.EndWork = now;
-
-                        worker.WorkStatus = false;
-                        worker.BreakStatus = false;
-                    }
-                    else return "Enum wasn't found";
-
-                    workerLog.UpdatedAt = now;
-                    workerLog.UpdatedBy = name;
-                    Db.Update(workerLog);
-                    await Db.SaveChangesAsync();
-
-                    return "Done update";
-                }
-
-                else return "No workerlog found";
-            }
-            catch (Exception)
+            if (workerLog != null)
             {
-                return "error somewhere";
+                var now = DateTime.Now;
+
+                var worker = await Db.Workers
+                    .Where(Q => Q.Id == workerId)
+                    .Select(Q => Q)
+                    .FirstOrDefaultAsync();
+
+                if (scanId == (int)DB.Enums.ScanEnums.StartBreak)
+                {
+                    workerLog.StartBreak = now;
+
+                    worker.WorkStatus = true;
+                    worker.BreakStatus = true;
+                }
+                else if (scanId == (int)DB.Enums.ScanEnums.EndBreak)
+                {
+                    workerLog.EndBreak = now;
+
+                    worker.WorkStatus = true;
+                    worker.BreakStatus = false;
+                }
+                else if (scanId == (int)DB.Enums.ScanEnums.EndWork)
+                {
+                    workerLog.EndWork = now;
+
+                    worker.WorkStatus = false;
+                    worker.BreakStatus = false;
+                }
+                else return false;
+
+                workerLog.UpdatedAt = now;
+                workerLog.UpdatedBy = name;
+                Db.Update(workerLog);
+                await Db.SaveChangesAsync();
+
+                return true;
             }
-            
+
+            else return false;
         }
 
         /// <summary>
