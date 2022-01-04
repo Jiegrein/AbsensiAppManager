@@ -50,7 +50,7 @@ namespace AbsensiAppWebApi.API
 
         // PUT api/<WorkerAPI>/5
         [HttpPut("update-log/{logId}")]
-        public async Task<bool> UpdateWorkerLog(string logId, [FromBody] WorkerLogModel model)
+        public async Task<string> UpdateWorkerLog(string logId, [FromBody] WorkerLogModel model)
         {
             var success = await WorkerService.UpdateWorkerLog(logId, model);
 
