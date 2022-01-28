@@ -73,14 +73,18 @@ namespace AbsensiAppWebApi.Services
         /// </summary>
         /// <param name="workerId"></param>
         /// <returns></returns>
-        public async Task<string> CreateWorkerLog(WorkerLogModel model)
+        public async Task<NewLogModel> CreateWorkerLog(WorkerLogModel model)
         {
             var scanId = await Db.ScanEnums
                 .Where(Q => Q.Id == model.ScanEnumId)
                 .Select(Q => Q.Id)
                 .FirstOrDefaultAsync();
 
-            if (scanId == (int)DB.Enums.ScanEnums.StartWork)
+            var isProjectId = await Db.Projects
+                .Where(Q => model.ProjectId.Contains(Q.ProjectId.ToString()))
+                .AnyAsync();
+
+            if (scanId == (int)DB.Enums.ScanEnums.StartWork && isProjectId)
             {
                 var name = await GetWorkerName(model.WorkerId);
 
@@ -111,10 +115,14 @@ namespace AbsensiAppWebApi.Services
 
                 await Db.SaveChangesAsync();
 
-                return logId.ToString();
+                return new NewLogModel()
+                { 
+                    LogId = logId.ToString(),
+                    ProjectId = model.ProjectId
+                };
             }
 
-            return "";
+            return new NewLogModel();
         }
 
         /// <summary>
