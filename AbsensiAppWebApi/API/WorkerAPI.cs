@@ -1,8 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using AbsensiAppWebApi.DB.Entities;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using AbsensiAppWebApi.Services;
 using AbsensiAppWebApi.Models;
@@ -23,38 +20,66 @@ namespace AbsensiAppWebApi.API
 
         // GET: api/<WorkerAPI>
         [HttpGet("{workerId}")]
-        public async Task<Worker> GetWorker(string workerId)
+        public async Task<IActionResult> GetWorker(string workerId)
         {
-            var workerDetail = await WorkerService.GetWorkerDetail(workerId);
+            try
+            {
+                var workerDetail = await WorkerService.GetWorkerDetail(workerId);
 
-            return workerDetail;
+                return Ok(workerDetail);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
         }
 
         // POST api/<WorkerAPI>
         [HttpPost("create-worker")]
-        public async Task<Worker> CreateWorker([FromBody] WorkerModel model)
+        public async Task<IActionResult> CreateWorker([Microsoft.AspNetCore.Mvc.FromBody] WorkerModel model)
         {
-            var newWorker = await WorkerService.CreateWorker(model);
+            try
+            {
+                var newWorker = await WorkerService.CreateWorker(model);
 
-            return newWorker;
+                return Ok(newWorker);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
         }
 
         // POST api/<WorkerAPI>
         [HttpPost("create-log")]
-        public async Task<NewLogModel> CreateWorkerLog([FromBody] WorkerLogModel model)
+        public async Task<IActionResult> CreateWorkerLog([FromBody] WorkerLogModel model)
         {
-            var logId = await WorkerService.CreateWorkerLog(model);
+            try
+            {
+                var logId = await WorkerService.CreateWorkerLog(model);
 
-            return logId;
+                return Ok(logId);
+            }
+            catch(Exception e)
+            {
+                return BadRequest(e);
+            }
         }
 
         // PUT api/<WorkerAPI>/5
         [HttpPut("update-log/{logId}")]
-        public async Task<bool> UpdateWorkerLog(string logId, [FromBody] WorkerLogModel model)
+        public async Task<IActionResult> UpdateWorkerLog(string logId, [FromBody] WorkerLogModel model)
         {
-            var success = await WorkerService.UpdateWorkerLog(logId, model);
+            try
+            {
+                var success = await WorkerService.UpdateWorkerLog(logId, model);
 
-            return success;
+                return Ok(success);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
         }
     }
 }
