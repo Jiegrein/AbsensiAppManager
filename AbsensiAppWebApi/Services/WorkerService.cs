@@ -125,7 +125,7 @@ namespace AbsensiAppWebApi.Services
 
                 return (false, new NewLogModel()
                 {
-                    Message = "Scan enum is not 1",
+                    Message = "Barcode yang di scan tidak terdaftar",
                     LogId = "",
                     ProjectId = ""
                 });
