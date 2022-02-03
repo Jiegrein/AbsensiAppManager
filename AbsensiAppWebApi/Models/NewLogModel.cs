@@ -10,5 +10,6 @@ namespace AbsensiAppWebApi.Models
     {
         public string LogId { get; set; }
         public string ProjectId { get; set; }
+        public string Message { get; set; }
     }
 }

@@ -60,12 +60,10 @@ namespace AbsensiAppWebApi.Services
 
                 return workerDetail;
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                Console.WriteLine(e);
+                return new Worker();
             }
-
-            return new Worker();
         }
 
         /// <summary>
@@ -73,56 +71,74 @@ namespace AbsensiAppWebApi.Services
         /// </summary>
         /// <param name="workerId"></param>
         /// <returns></returns>
-        public async Task<NewLogModel> CreateWorkerLog(WorkerLogModel model)
+        public async Task<(bool, NewLogModel)> CreateWorkerLog(WorkerLogModel model)
         {
-            var scanId = await Db.ScanEnums
-                .Where(Q => Q.Id == model.ScanEnumId)
-                .Select(Q => Q.Id)
-                .FirstOrDefaultAsync();
-
-            var isProjectId = await Db.Projects
-                .Where(Q => model.ProjectId.Contains(Q.ProjectId.ToString()))
-                .AnyAsync();
-
-            if (scanId == (int)DB.Enums.ScanEnums.StartWork && isProjectId)
+            try
             {
-                var name = await GetWorkerName(model.WorkerId);
-
-                var now = DateTime.Now;
-
-                var logId = now.ToString("ddddyyyyMMddHHmmdd");
-
-                var workerId = new Guid(model.WorkerId);
-
-                var workerLog = new WorkerLog()
-                {
-                    LogId = logId,
-                    WorkerId = workerId,
-                    StartWork = now,
-                    ProjectId = new Guid(model.ProjectId),
-                    CreatedAt = now,
-                    CreatedBy = name,
-                };
-
-                var worker = await Db.Workers
-                    .Where(Q => Q.Id == workerId)
-                    .Select(Q => Q)
+                var scanId = await Db.ScanEnums
+                    .Where(Q => Q.Id == model.ScanEnumId)
+                    .Select(Q => Q.Id)
                     .FirstOrDefaultAsync();
 
-                worker.WorkStatus = true;
+                var isProjectId = await Db.Projects
+                    .Where(Q => model.ProjectId.Contains(Q.ProjectId.ToString()))
+                    .AnyAsync();
 
-                Db.Add(workerLog);
+                if (scanId == (int)DB.Enums.ScanEnums.StartWork && isProjectId)
+                {
+                    var name = await GetWorkerName(model.WorkerId);
 
-                await Db.SaveChangesAsync();
+                    var now = DateTime.Now;
 
-                return new NewLogModel()
-                { 
-                    LogId = logId.ToString(),
-                    ProjectId = model.ProjectId
-                };
+                    var logId = now.ToString("ddddyyyyMMddHHmmdd");
+
+                    var workerId = new Guid(model.WorkerId);
+
+                    var workerLog = new WorkerLog()
+                    {
+                        LogId = logId,
+                        WorkerId = workerId,
+                        StartWork = now,
+                        ProjectId = new Guid(model.ProjectId),
+                        CreatedAt = now,
+                        CreatedBy = name,
+                    };
+
+                    var worker = await Db.Workers
+                        .Where(Q => Q.Id == workerId)
+                        .Select(Q => Q)
+                        .FirstOrDefaultAsync();
+
+                    worker.WorkStatus = true;
+
+                    Db.Add(workerLog);
+
+                    await Db.SaveChangesAsync();
+
+                    return (true, new NewLogModel()
+                    {
+                        LogId = logId.ToString(),
+                        ProjectId = model.ProjectId,
+                        Message = ""
+                    });
+                }
+
+                return (false, new NewLogModel()
+                {
+                    Message = "Scan enum is not 1",
+                    LogId = "",
+                    ProjectId = ""
+                });
             }
-
-            return new NewLogModel();
+            catch (Exception e)
+            {
+                return (false, new NewLogModel()
+                {
+                    Message = e.Message,
+                    LogId = "",
+                    ProjectId = ""
+                });
+            }
         }
 
         /// <summary>
@@ -130,61 +146,68 @@ namespace AbsensiAppWebApi.Services
         /// </summary>
         /// <param name="workerId"></param>
         /// <returns></returns>
-        public async Task<bool> UpdateWorkerLog(string logId, WorkerLogModel model)
+        public async Task<(bool, string)> UpdateWorkerLog(string logId, WorkerLogModel model)
         {
-            var name = await GetWorkerName(model.WorkerId);
-
-            var workerId = Guid.Parse(model.WorkerId);
-
-            var workerLog = await Db.WorkerLogs
-                .Where(Q => Q.LogId == logId).FirstOrDefaultAsync();
-
-            var scanId = await Db.ScanEnums
-                .Where(Q => Q.Id == model.ScanEnumId)
-                .Select(Q => Q.Id)
-                .FirstOrDefaultAsync();
-
-            if (workerLog != null)
+            try
             {
-                var now = DateTime.Now;
+                var name = await GetWorkerName(model.WorkerId);
 
-                var worker = await Db.Workers
-                    .Where(Q => Q.Id == workerId)
-                    .Select(Q => Q)
+                var workerId = Guid.Parse(model.WorkerId);
+
+                var workerLog = await Db.WorkerLogs
+                    .Where(Q => Q.LogId == logId).FirstOrDefaultAsync();
+
+                var scanId = await Db.ScanEnums
+                    .Where(Q => Q.Id == model.ScanEnumId)
+                    .Select(Q => Q.Id)
                     .FirstOrDefaultAsync();
 
-                if (scanId == (int)DB.Enums.ScanEnums.StartBreak)
+                if (workerLog != null)
                 {
-                    workerLog.StartBreak = now;
+                    var now = DateTime.Now;
 
-                    worker.WorkStatus = true;
-                    worker.BreakStatus = true;
+                    var worker = await Db.Workers
+                        .Where(Q => Q.Id == workerId)
+                        .Select(Q => Q)
+                        .FirstOrDefaultAsync();
+
+                    if (scanId == (int)DB.Enums.ScanEnums.StartBreak)
+                    {
+                        workerLog.StartBreak = now;
+
+                        worker.WorkStatus = true;
+                        worker.BreakStatus = true;
+                    }
+                    else if (scanId == (int)DB.Enums.ScanEnums.EndBreak)
+                    {
+                        workerLog.EndBreak = now;
+
+                        worker.WorkStatus = true;
+                        worker.BreakStatus = false;
+                    }
+                    else if (scanId == (int)DB.Enums.ScanEnums.EndWork)
+                    {
+                        workerLog.EndWork = now;
+
+                        worker.WorkStatus = false;
+                        worker.BreakStatus = false;
+                    }
+                    else return (false, "");
+
+                    workerLog.UpdatedAt = now;
+                    workerLog.UpdatedBy = name;
+                    Db.Update(workerLog);
+                    await Db.SaveChangesAsync();
+
+                    return (true, "");
                 }
-                else if (scanId == (int)DB.Enums.ScanEnums.EndBreak)
-                {
-                    workerLog.EndBreak = now;
 
-                    worker.WorkStatus = true;
-                    worker.BreakStatus = false;
-                }
-                else if (scanId == (int)DB.Enums.ScanEnums.EndWork)
-                {
-                    workerLog.EndWork = now;
-
-                    worker.WorkStatus = false;
-                    worker.BreakStatus = false;
-                }
-                else return false;
-
-                workerLog.UpdatedAt = now;
-                workerLog.UpdatedBy = name;
-                Db.Update(workerLog);
-                await Db.SaveChangesAsync();
-
-                return true;
+                else return (false, "");
             }
-
-            else return false;
+            catch (Exception e)
+            {
+                return (false, e.Message);
+            }
         }
 
         /// <summary>

@@ -36,7 +36,7 @@ namespace AbsensiAppWebApi.API
 
         // POST api/<WorkerAPI>
         [HttpPost("create-worker")]
-        public async Task<IActionResult> CreateWorker([Microsoft.AspNetCore.Mvc.FromBody] WorkerModel model)
+        public async Task<IActionResult> CreateWorker([FromBody] WorkerModel model)
         {
             try
             {
@@ -54,15 +54,15 @@ namespace AbsensiAppWebApi.API
         [HttpPost("create-log")]
         public async Task<IActionResult> CreateWorkerLog([FromBody] WorkerLogModel model)
         {
-            try
-            {
-                var logId = await WorkerService.CreateWorkerLog(model);
+            var (status, NewLog) = await WorkerService.CreateWorkerLog(model);
 
-                return Ok(logId);
-            }
-            catch(Exception e)
+            if (status)
             {
-                return BadRequest(e);
+                return Ok(NewLog);
+            }
+            else
+            {
+                return BadRequest(NewLog);
             }
         }
 
@@ -70,15 +70,15 @@ namespace AbsensiAppWebApi.API
         [HttpPut("update-log/{logId}")]
         public async Task<IActionResult> UpdateWorkerLog(string logId, [FromBody] WorkerLogModel model)
         {
-            try
-            {
-                var success = await WorkerService.UpdateWorkerLog(logId, model);
+            var (success, message) = await WorkerService.UpdateWorkerLog(logId, model);
 
-                return Ok(success);
-            }
-            catch (Exception e)
+            if (success)
             {
-                return BadRequest(e);
+                return Ok();
+            }
+            else
+            {
+                return BadRequest(message);
             }
         }
     }
