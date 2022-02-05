@@ -75,6 +75,16 @@ namespace AbsensiAppWebApi.Services
         {
             try
             {
+                var now = DateTime.Now;
+
+                var startDate = new DateTime(now.Year, now.Month, now.Day, 0, 0, 0);
+
+                var endDate = new DateTime(now.Year, now.Month, now.Day, 23, 59, 59);
+
+                var sameDayLogIdExist = await Db.WorkerLogs
+                    .Where(Q => Q.CreatedAt >= startDate && Q.CreatedAt <= endDate)
+                    .FirstOrDefaultAsync();
+
                 var scanId = await Db.ScanEnums
                     .Where(Q => Q.Id == model.ScanEnumId)
                     .Select(Q => Q.Id)
@@ -84,15 +94,22 @@ namespace AbsensiAppWebApi.Services
                     .Where(Q => model.ProjectId.Contains(Q.ProjectId.ToString()))
                     .AnyAsync();
 
-                if (scanId == (int)DB.Enums.ScanEnums.StartWork && isProjectId)
+                if (sameDayLogIdExist == default)
+                {
+                    return (false, new NewLogModel()
+                    {
+                        Message = "Hari ini sudah scan kerja pada jam : " + sameDayLogIdExist.CreatedAt.Hour + ":" + sameDayLogIdExist.CreatedAt.Minute + ":" + sameDayLogIdExist.CreatedAt.Second,
+                        LogId = "",
+                        ProjectId = ""
+                    });
+                }
+                else if (scanId == (int)DB.Enums.ScanEnums.StartWork && isProjectId)
                 {
                     var name = await GetWorkerName(model.WorkerId);
 
-                    var now = DateTime.Now;
+                    var workerId = new Guid(model.WorkerId);
 
                     var logId = now.ToString("ddddyyyyMMddHHmmdd");
-
-                    var workerId = new Guid(model.WorkerId);
 
                     var workerLog = new WorkerLog()
                     {
