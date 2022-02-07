@@ -94,13 +94,13 @@ namespace AbsensiAppWebApi.Services
                     .Where(Q => model.ProjectId.Contains(Q.ProjectId.ToString()))
                     .AnyAsync();
 
-                if (sameDayLogIdExist == default)
+                if (sameDayLogIdExist != default)
                 {
                     return (false, new NewLogModel()
                     {
-                        Message = "Hari ini sudah scan kerja pada jam : " + sameDayLogIdExist.CreatedAt.Hour + ":" + sameDayLogIdExist.CreatedAt.Minute + ":" + sameDayLogIdExist.CreatedAt.Second,
                         LogId = "",
-                        ProjectId = ""
+                        ProjectId = "",
+                        Message = "Hari ini sudah scan kerja pada jam : " + sameDayLogIdExist.CreatedAt.Hour + ":" + sameDayLogIdExist.CreatedAt.Minute + ":" + sameDayLogIdExist.CreatedAt.Second,
                     });
                 }
                 else if (scanId == (int)DB.Enums.ScanEnums.StartWork && isProjectId)
@@ -142,18 +142,18 @@ namespace AbsensiAppWebApi.Services
 
                 return (false, new NewLogModel()
                 {
-                    Message = "Barcode yang di scan tidak terdaftar",
                     LogId = "",
-                    ProjectId = ""
+                    ProjectId = "",
+                    Message = "Barcode yang di scan tidak terdaftar",
                 });
             }
             catch (Exception e)
             {
                 return (false, new NewLogModel()
                 {
-                    Message = e.Message,
                     LogId = "",
-                    ProjectId = ""
+                    ProjectId = "",
+                    Message = e.Message,
                 });
             }
         }
