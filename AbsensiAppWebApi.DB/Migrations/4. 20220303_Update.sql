@@ -1,0 +1,2 @@
+﻿ALTER TABLE worker
+ADD daily_pay DECIMAL DEFAULT 0 NOT NULL;
