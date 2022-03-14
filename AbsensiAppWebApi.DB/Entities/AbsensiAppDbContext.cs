@@ -18,7 +18,7 @@ namespace AbsensiAppWebApi.DB.Entities
         public virtual DbSet<ScanEnum> ScanEnums { get; set; }
         public virtual DbSet<Worker> Workers { get; set; }
         public virtual DbSet<WorkerLog> WorkerLogs { get; set; }
-
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasAnnotation("Relational:Collation", "English_Indonesia.1252");

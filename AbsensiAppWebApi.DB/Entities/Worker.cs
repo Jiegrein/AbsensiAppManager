@@ -31,6 +31,8 @@ namespace AbsensiAppWebApi.DB.Entities
         public DateTime CreatedAt { get; set; }
         [Column("updated_at", TypeName = "timestamp with time zone")]
         public DateTime? UpdatedAt { get; set; }
+        [Column("daily_pay")]
+        public decimal DailyPay { get; set; }
 
         [InverseProperty(nameof(WorkerLog.Worker))]
         public virtual ICollection<WorkerLog> WorkerLogs { get; set; }

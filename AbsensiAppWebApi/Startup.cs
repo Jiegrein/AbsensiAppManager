@@ -33,6 +33,7 @@ namespace AbsensiAppWebApi
             });
 
             services.AddTransient<WorkerService>();
+            services.AddTransient<AdminService>();
 
             services.AddDbContext<AbsensiAppDbContext>(options =>
             {
