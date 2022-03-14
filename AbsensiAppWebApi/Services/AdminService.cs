@@ -55,6 +55,12 @@ namespace AbsensiAppWebApi.Services
             worksheet.Cell("D1").Value = new TimeSpan(17, 0, 0);
             row++;
 
+            worksheet.Column("H").Style.NumberFormat.SetNumberFormatId((int)XLPredefinedFormat.Number.IntegerWithSeparator);
+            worksheet.Column("I").Style.NumberFormat.SetNumberFormatId((int)XLPredefinedFormat.Number.IntegerWithSeparator);
+            worksheet.Column("J").Style.NumberFormat.SetNumberFormatId((int)XLPredefinedFormat.Number.IntegerWithSeparator);
+
+            var allRegisteredProject = await Db.Projects.Select(Q => Q).ToDictionaryAsync(Q => Q.ProjectId, Q => Q.ProjectName);
+
             foreach (var item in dateRangeDict.Keys)
             {
                 var from = item;
@@ -63,10 +69,6 @@ namespace AbsensiAppWebApi.Services
 
                 worksheet.Cell(row, 1).Value = from.ToString("dddd, dd MMMM yyyy", new CultureInfo("id-ID")) + " - " + to.ToString("dddd, dd MMMM yyyy", new CultureInfo("id-ID"));
                 row += 2;
-
-                worksheet.Column("G").Style.NumberFormat.SetNumberFormatId((int)XLPredefinedFormat.Number.IntegerWithSeparator);
-                worksheet.Column("H").Style.NumberFormat.SetNumberFormatId((int)XLPredefinedFormat.Number.IntegerWithSeparator);
-                worksheet.Column("I").Style.NumberFormat.SetNumberFormatId((int)XLPredefinedFormat.Number.IntegerWithSeparator);
 
                 foreach (var workerId in workerThatExistInSelectedDate)
                 {
@@ -85,14 +87,15 @@ namespace AbsensiAppWebApi.Services
 
                         var totalPay = 0m;
 
-                        worksheet.Cell(row, 2).Value = "Tanggal kerja";
-                        worksheet.Cell(row, 3).Value = "Masuk kerja";
-                        worksheet.Cell(row, 4).Value = "Mulai istirahat";
-                        worksheet.Cell(row, 5).Value = "Selesai istirahat";
-                        worksheet.Cell(row, 6).Value = "Selesai kerja";
-                        worksheet.Cell(row, 7).Value = "Gaji per hari";
-                        worksheet.Cell(row, 8).Value = "Penalti keterlambatan";
-                        worksheet.Cell(row, 9).Value = "Total gaji per hari";
+                        worksheet.Cell(row, 2).Value = "Proyek";
+                        worksheet.Cell(row, 3).Value = "Tanggal kerja";
+                        worksheet.Cell(row, 4).Value = "Masuk kerja";
+                        worksheet.Cell(row, 5).Value = "Mulai istirahat";
+                        worksheet.Cell(row, 6).Value = "Selesai istirahat";
+                        worksheet.Cell(row, 7).Value = "Selesai kerja";
+                        worksheet.Cell(row, 8).Value = "Gaji per hari";
+                        worksheet.Cell(row, 9).Value = "Penalti keterlambatan";
+                        worksheet.Cell(row, 10).Value = "Total gaji per hari";
                         row++;
 
                         foreach (var log in data)
@@ -116,16 +119,19 @@ namespace AbsensiAppWebApi.Services
                             var timeEndBreak = new TimeSpan(log.EndBreak.Value.Hour, log.EndBreak.Value.Minute, log.EndBreak.Value.Second);
                             var timeEndWork = new TimeSpan(log.EndWork.Value.Hour, log.EndWork.Value.Minute, log.EndWork.Value.Second);
 
-                            worksheet.Cell(row, 2).Value = log.CreatedAt.ToString("dddd, dd MMMM yyyy", new CultureInfo("id-ID"));
-                            worksheet.Cell(row, 3).Value = log.StartWork.HasValue ? $"{timeStartWork}" : "";
-                            worksheet.Cell(row, 4).Value = log.StartBreak.HasValue ? $"{timeStartBreak}" : "";
-                            worksheet.Cell(row, 5).Value = log.EndBreak.HasValue ? $"{timeEndBreak}" : "";
-                            worksheet.Cell(row, 6).Value = log.EndWork.HasValue ? $"{timeEndWork}" : "";
+                            allRegisteredProject.TryGetValue(log.ProjectId.GetValueOrDefault(), out var projectName);
 
-                            worksheet.Cell(row, 7).Value = dailyPay;
-                            worksheet.Cell(row, 8).FormulaR1C1 = "ROUNDUP((RC[-5]-R1C1)*1440,0)";
-                            worksheet.Cell(row, 8).FormulaR1C1 = "=ROUND((IF(ROUNDUP((RC[-5]-R1C1)*1440,0) > 5, ROUNDUP((RC[-5]-R1C1)*1440,0), 0) + IF(ROUNDUP((RC[-3]-R1C3)*1440,0) > 5, ROUNDUP((RC[-3]-R1C3)*1440,0), 0) + IF(ROUNDUP((RC[-2]-R1C4)*1440,0) < -5, -ROUNDUP((RC[-2]-R1C4)*1440,0), 0)) * (RC[-1] / 480), 0)";
-                            worksheet.Cell(row, 9).FormulaR1C1 = "RC[-2]-RC[-1]";
+                            worksheet.Cell(row, 2).Value = projectName;
+                            worksheet.Cell(row, 3).Value = log.CreatedAt.ToString("dddd, dd MMMM yyyy", new CultureInfo("id-ID"));
+                            worksheet.Cell(row, 4).Value = log.StartWork.HasValue ? $"{timeStartWork}" : "";
+                            worksheet.Cell(row, 5).Value = log.StartBreak.HasValue ? $"{timeStartBreak}" : "";
+                            worksheet.Cell(row, 6).Value = log.EndBreak.HasValue ? $"{timeEndBreak}" : "";
+                            worksheet.Cell(row, 7).Value = log.EndWork.HasValue ? $"{timeEndWork}" : "";
+
+                            worksheet.Cell(row, 8).Value = dailyPay;
+                            //worksheet.Cell(row, 9).FormulaR1C1 = "ROUNDUP((RC[-5]-R1C1)*1440,0)";
+                            worksheet.Cell(row, 9).FormulaR1C1 = "=ROUND((IF(ROUNDUP((RC[-5]-R1C1)*1440,0) > 5, ROUNDUP((RC[-5]-R1C1)*1440,0), 0) + IF(ROUNDUP((RC[-3]-R1C3)*1440,0) > 5, ROUNDUP((RC[-3]-R1C3)*1440,0), 0) + IF(ROUNDUP((RC[-2]-R1C4)*1440,0) < -5, -ROUNDUP((RC[-2]-R1C4)*1440,0), 0)) * (RC[-1] / 480), 0)";
+                            worksheet.Cell(row, 10).FormulaR1C1 = "RC[-2]-RC[-1]";
 
                             row++;
                         }
@@ -136,7 +142,7 @@ namespace AbsensiAppWebApi.Services
 
                         var dataCount = data.Count;
 
-                        worksheet.Cell(row, 9).FormulaR1C1 = $"SUM(R[-{data.Count}]C:R[-1]C)";
+                        worksheet.Cell(row, 10).FormulaR1C1 = $"SUM(R[-{data.Count}]C:R[-1]C)";
                         row += 2;
                     }
                 }
@@ -186,15 +192,14 @@ namespace AbsensiAppWebApi.Services
                         from = from.AddDays(1);
                     }
 
-                    if (from.DayOfWeek == DayOfWeek.Friday)
+                    if (from.DayOfWeek == DayOfWeek.Sunday)
                     {
-                        // If firstloop from date is friday, set fromWeekStart to from(1st date that was selected by user) and set toWeekEnd to the same date since we only care about Monday - Friday in the same week
+                        // If firstloop from date is friday, set fromWeekStart to from(1st date that was selected by user) and set toWeekEnd to Sunday as the last day of week
                         fromWeekStart = from;
                         toWeekEnd = from.AddHours(23).AddMinutes(59).AddSeconds(59); ;
 
                         dateDict.Add(fromWeekStart, toWeekEnd);
-                        // Add 3 days to move from into Monday
-                        from = from.AddDays(3);
+                        from = from.AddDays(1);
                     }
                     else
                     {
@@ -227,14 +232,14 @@ namespace AbsensiAppWebApi.Services
                         fromWeekStart = from;
                         from = from.AddDays(1);
                     }
-                    else if (from.DayOfWeek == DayOfWeek.Friday)
+                    else if (from.DayOfWeek == DayOfWeek.Sunday)
                     {
-                        // set toWeekEnd to Friday of that week since we only care about Monday - Friday in the same week
+                        // set toWeekEnd to Sunday as the last day of week
                         toWeekEnd = from.AddHours(23).AddMinutes(59).AddSeconds(59);
 
                         dateDict.Add(fromWeekStart, toWeekEnd);
-                        // Add 3 days to move from into Monday
-                        from = from.AddDays(3);
+
+                        from = from.AddDays(1);
 
                     }
                     else
