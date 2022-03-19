@@ -2,10 +2,8 @@
 using System;
 using System.Threading.Tasks;
 using AbsensiAppWebApi.Services;
-using System.Net.Http;
-using System.Net;
 using System.IO;
-using System.Net.Http.Headers;
+using AbsensiAppWebApi.Models;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -25,26 +23,20 @@ namespace AbsensiAppWebApi.API
 
         // POST: api/<WorkerAPI>
         [HttpPost("get-data-between-date")]
-        public async Task<IActionResult> GenerateExcelData(DateTime dateFrom, DateTime dateTo)
+        public async Task<IActionResult> GenerateExcelData([FromBody]ExcelModel model)
         {
             try
             {
-                var filePath = await AdminService.CreateExcel(dateFrom, dateTo);
+                TimeZoneInfo idZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
 
-                var fileName = Path.GetFileName(filePath);
+                var fileName = $"Gajian tanggal {DateTime.Now:yyyyMMddHHmmss}.xlsx";
 
-                HttpResponseMessage response = new(HttpStatusCode.OK)
-                {
-                    Content = new StreamContent(new FileStream(filePath, FileMode.Open, FileAccess.Read))
-                };
-                response.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment")
-                {
-                    FileName = fileName
-                };
-                response.Content.Headers.ContentType = new MediaTypeHeaderValue(ExcelContentType);
+                var from = TimeZoneInfo.ConvertTime(model.DateFrom, TimeZoneInfo.Utc, idZone);
+                var to = TimeZoneInfo.ConvertTime(model.DateTo, TimeZoneInfo.Utc, idZone).AddHours(23).AddMinutes(59).AddSeconds(59);
 
-                // TODO: Schedule temp files deletion.
-                return Ok(response);
+                var file = await AdminService.CreateExcel(from, to);
+
+                return File(file, ExcelContentType, fileName);
             }
             catch (Exception e)
             {
