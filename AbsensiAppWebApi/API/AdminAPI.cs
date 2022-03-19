@@ -2,7 +2,6 @@
 using System;
 using System.Threading.Tasks;
 using AbsensiAppWebApi.Services;
-using AbsensiAppWebApi.Models;
 using System.Net.Http;
 using System.Net;
 using System.IO;
@@ -24,8 +23,8 @@ namespace AbsensiAppWebApi.API
             this.AdminService = adminService;
         }
 
-        // GET: api/<WorkerAPI>
-        [HttpGet("get-data-between-date")]
+        // POST: api/<WorkerAPI>
+        [HttpPost("get-data-between-date")]
         public async Task<IActionResult> GenerateExcelData(DateTime dateFrom, DateTime dateTo)
         {
             try
