@@ -2,8 +2,8 @@
 using System;
 using System.Threading.Tasks;
 using AbsensiAppWebApi.Services;
-using System.IO;
 using AbsensiAppWebApi.Models;
+using System.Net;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -31,8 +31,12 @@ namespace AbsensiAppWebApi.API
 
                 var fileName = $"Gajian tanggal {DateTime.Now:yyyyMMddHHmmss}.xlsx";
 
-                var from = TimeZoneInfo.ConvertTime(model.DateFrom, TimeZoneInfo.Utc, idZone);
-                var to = TimeZoneInfo.ConvertTime(model.DateTo, TimeZoneInfo.Utc, idZone).AddHours(23).AddMinutes(59).AddSeconds(59);
+                //var from = TimeZoneInfo.ConvertTime(model.DateFrom, TimeZoneInfo.Utc, idZone);
+                //var to = TimeZoneInfo.ConvertTime(model.DateTo, TimeZoneInfo.Utc, idZone).AddHours(23).AddMinutes(59).AddSeconds(59);
+
+                var from = model.DateFrom;
+
+                var to = model.DateTo.AddHours(23).AddMinutes(59).AddSeconds(59);
 
                 var file = await AdminService.CreateExcel(from, to);
 
