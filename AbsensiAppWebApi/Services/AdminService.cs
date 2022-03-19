@@ -34,7 +34,7 @@ namespace AbsensiAppWebApi.Services
             return query;
         }
 
-        public async Task<string> CreateExcel(DateTime dateFrom, DateTime dateTo)
+        public async Task<Byte[]> CreateExcel(DateTime dateFrom, DateTime dateTo)
         {
             using var workbook = new XLWorkbook();
             var worksheet = workbook.Worksheets.Add();
@@ -67,8 +67,10 @@ namespace AbsensiAppWebApi.Services
                 var exist = dateRangeDict.TryGetValue(from, out var to);
                 var counter = 1;
 
+                worksheet.Range(row, 1, row, 10).Merge();
+                worksheet.Range(row, 1, row, 10).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
                 worksheet.Cell(row, 1).Value = from.ToString("dddd, dd MMMM yyyy", new CultureInfo("id-ID")) + " - " + to.ToString("dddd, dd MMMM yyyy", new CultureInfo("id-ID"));
-                row += 2;
+                row++;
 
                 foreach (var workerId in workerThatExistInSelectedDate)
                 {
@@ -147,6 +149,7 @@ namespace AbsensiAppWebApi.Services
                     }
                 }
                 counter++;
+                row++;
             }
 
             worksheet.Columns(1, 50).AdjustToContents();
@@ -160,7 +163,10 @@ namespace AbsensiAppWebApi.Services
             var filePath = $"{BlobRootPath}/temp/excel/{fileName}";
             workbook.SaveAs(filePath);
 
-            return filePath;
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+            var content = stream.ToArray();
+            return content;
         }
 
         public Dictionary<DateTime, DateTime> CreateWeeklyRange(DateTime dateFrom, DateTime dateTo)
