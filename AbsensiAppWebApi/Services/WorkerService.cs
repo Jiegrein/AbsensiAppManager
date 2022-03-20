@@ -84,7 +84,7 @@ namespace AbsensiAppWebApi.Services
                 var workerId = new Guid(model.WorkerId);
 
                 var sameDayLogIdExist = await Db.WorkerLogs
-                    .Where(Q => Q.CreatedAt >= startDate && Q.CreatedAt <= endDate && Q.WorkerId.GetValueOrDefault() == workerId)
+                    .Where(Q => Q.CreatedAt >= startDate && Q.CreatedAt <= endDate && Q.WorkerId == workerId)
                     .ToListAsync();
 
                 var scanId = await Db.ScanEnums
