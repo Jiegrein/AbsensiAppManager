@@ -110,7 +110,7 @@ namespace AbsensiAppWebApi.Services
                 {
                     var name = await GetWorkerName(model.WorkerId);
 
-                    var logId = now.ToString("ddddyyyyMMddHHmmdd");
+                    var logId = now.ToString("ddddyyyyMMddHHmmss");
 
                     var workerLog = new WorkerLog()
                     {
