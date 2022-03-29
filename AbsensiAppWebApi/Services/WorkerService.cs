@@ -96,21 +96,24 @@ namespace AbsensiAppWebApi.Services
                     .Where(Q => model.ProjectId.Contains(Q.ProjectId.ToString()))
                     .AnyAsync();
 
-                //if (sameDayLogIdExist.Count > 0)
-                //{
-                //    return (false, new NewLogModel()
-                //    {
-                //        LogId = "",
-                //        ProjectId = "",
-                //        Message = "Hari ini sudah scan kerja pada jam : " + sameDayLogIdExist.FirstOrDefault().CreatedAt.Hour + ":" + sameDayLogIdExist.FirstOrDefault().CreatedAt.Minute + ":" + sameDayLogIdExist.FirstOrDefault().CreatedAt.Second,
-                //    });
-                //}
-                //else 
+                if (sameDayLogIdExist.Count > 0)
+                {
+                    if (sameDayLogIdExist.FirstOrDefault().ProjectId.ToString() == model.ProjectId)
+                    {
+                        return (false, new NewLogModel()
+                        {
+                            LogId = "",
+                            ProjectId = "",
+                            Message = "Hari ini sudah scan kerja pada jam : " + sameDayLogIdExist.FirstOrDefault().CreatedAt.Hour + ":" + sameDayLogIdExist.FirstOrDefault().CreatedAt.Minute + ":" + sameDayLogIdExist.FirstOrDefault().CreatedAt.Second,
+                        });
+                    }
+                }
+                
                 if (scanId == (int)DB.Enums.ScanEnums.StartWork && isProjectId)
                 {
                     var name = await GetWorkerName(model.WorkerId);
 
-                    var logId = now.ToString("ddddyyyyMMddHHmmss");
+                    var logId = now.ToString("ddddyyyyMMddHHmmdd");
 
                     var workerLog = new WorkerLog()
                     {
