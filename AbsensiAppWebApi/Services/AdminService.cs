@@ -116,10 +116,10 @@ namespace AbsensiAppWebApi.Services
 
                             totalPay += deductedPay;
 
-                            var timeStartWork = new TimeSpan(log.StartWork.Value.Hour, log.StartWork.Value.Minute, log.StartWork.Value.Second);
-                            var timeStartBreak = new TimeSpan(log.StartBreak.Value.Hour, log.StartBreak.Value.Minute, log.StartBreak.Value.Second);
-                            var timeEndBreak = new TimeSpan(log.EndBreak.Value.Hour, log.EndBreak.Value.Minute, log.EndBreak.Value.Second);
-                            var timeEndWork = new TimeSpan(log.EndWork.Value.Hour, log.EndWork.Value.Minute, log.EndWork.Value.Second);
+                            var timeStartWork = new TimeSpan(log.StartWork.GetValueOrDefault().Hour, log.StartWork.GetValueOrDefault().Minute, log.StartWork.GetValueOrDefault().Second);
+                            var timeStartBreak = new TimeSpan(log.StartBreak.GetValueOrDefault().Hour, log.StartBreak.GetValueOrDefault().Minute, log.StartBreak.GetValueOrDefault().Second);
+                            var timeEndBreak = new TimeSpan(log.EndBreak.GetValueOrDefault().Hour, log.EndBreak.GetValueOrDefault().Minute, log.EndBreak.GetValueOrDefault().Second);
+                            var timeEndWork = new TimeSpan(log.EndWork.GetValueOrDefault().Hour, log.EndWork.GetValueOrDefault().Minute, log.EndWork.GetValueOrDefault().Second);
 
                             allRegisteredProject.TryGetValue(log.ProjectId.GetValueOrDefault(), out var projectName);
 
