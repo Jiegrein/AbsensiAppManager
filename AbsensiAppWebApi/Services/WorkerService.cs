@@ -98,7 +98,7 @@ namespace AbsensiAppWebApi.Services
 
                 if (sameDayLogIdExist.Count > 0)
                 {
-                    if (sameDayLogIdExist.FirstOrDefault().ProjectId.ToString() == model.ProjectId)
+                    if (sameDayLogIdExist.Select(Q => Q.ProjectId.ToString()).Contains(model.ProjectId))
                     {
                         return (false, new NewLogModel()
                         {
