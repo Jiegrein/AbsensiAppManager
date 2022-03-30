@@ -53,7 +53,8 @@ namespace AbsensiAppWebApi
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            app.UseCors(builder => {
+            app.UseCors(builder =>
+            {
                 builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
             });
 
@@ -80,14 +81,13 @@ namespace AbsensiAppWebApi
         {
             string connectionUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
 
-            if (string.IsNullOrEmpty(connectionUrl)) connectionUrl = "postgres://aswjhrgg:fpEqWOuQ_8f1AHNLR-CLfnmy2yAZfS0F@arjuna.db.elephantsql.com/aswjhrgg";
-
-            var databaseUri = new Uri(connectionUrl);
-
-            string db = databaseUri.LocalPath.TrimStart('/');
-            string[] userInfo = databaseUri.UserInfo.Split(':', StringSplitOptions.RemoveEmptyEntries);
-
-            return $"User ID={userInfo[0]};Password={userInfo[1]};Host={databaseUri.Host};Port={databaseUri.Port};Database={db};Pooling=true;SSL Mode=Require;Trust Server Certificate=True;";
+            var uri = new Uri(connectionUrl);
+            var db = uri.AbsolutePath.Trim('/');
+            var user = uri.UserInfo.Split(':')[0];
+            var passwd = uri.UserInfo.Split(':')[1];
+            var port = uri.Port > 0 ? uri.Port : 5432;
+            var connStr = $"Server={uri.Host};Database={db};User Id={user};Password={passwd};Port={port};Pooling=true;SSL Mode=Require;Trust Server Certificate=True;";
+            return connStr;
         }
     }
 }
