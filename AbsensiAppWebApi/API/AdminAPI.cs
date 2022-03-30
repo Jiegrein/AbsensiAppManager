@@ -27,12 +27,7 @@ namespace AbsensiAppWebApi.API
         {
             try
             {
-                TimeZoneInfo idZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
-
                 var fileName = $"Gajian tanggal {DateTime.Now:yyyyMMddHHmmss}.xlsx";
-
-                //var from = TimeZoneInfo.ConvertTime(model.DateFrom, TimeZoneInfo.Utc, idZone);
-                //var to = TimeZoneInfo.ConvertTime(model.DateTo, TimeZoneInfo.Utc, idZone).AddHours(23).AddMinutes(59).AddSeconds(59);
 
                 var file = await AdminService.CreateExcel(model.DateFrom, model.DateTo);
 
