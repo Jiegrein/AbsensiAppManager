@@ -81,12 +81,15 @@ namespace AbsensiAppWebApi
         {
             string connectionUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
 
+            if (string.IsNullOrEmpty(connectionUrl)) connectionUrl = "postgres://aswjhrgg:fpEqWOuQ_8f1AHNLR-CLfnmy2yAZfS0F@arjuna.db.elephantsql.com/aswjhrgg";
+
             var uri = new Uri(connectionUrl);
             var db = uri.AbsolutePath.Trim('/');
             var user = uri.UserInfo.Split(':')[0];
             var passwd = uri.UserInfo.Split(':')[1];
             var port = uri.Port > 0 ? uri.Port : 5432;
-            var connStr = $"Server={uri.Host};Database={db};User Id={user};Password={passwd};Port={port};Pooling=true;SSL Mode=Require;Trust Server Certificate=True;";
+            var connStr = string.Format("Server={0};Database={1};User Id={2};Password={3};Port={4};Pooling=true;SSL Mode=Require;Trust Server Certificate=True;",
+                uri.Host, db, user, passwd, port);
             return connStr;
         }
     }
