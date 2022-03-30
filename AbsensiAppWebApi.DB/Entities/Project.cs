@@ -27,6 +27,8 @@ namespace AbsensiAppWebApi.DB.Entities
         public DateTime? UpdatedAt { get; set; }
         [Column("updated_by")]
         public string UpdatedBy { get; set; }
+        [Column("hour_offset_gmt")]
+        public int HourOffsetGmt { get; set; }
 
         [ForeignKey(nameof(BlobId))]
         [InverseProperty("Projects")]

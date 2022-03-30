@@ -59,7 +59,7 @@ namespace AbsensiAppWebApi.Services
             worksheet.Column("I").Style.NumberFormat.SetNumberFormatId((int)XLPredefinedFormat.Number.IntegerWithSeparator);
             worksheet.Column("J").Style.NumberFormat.SetNumberFormatId((int)XLPredefinedFormat.Number.IntegerWithSeparator);
 
-            var allRegisteredProject = await Db.Projects.Select(Q => Q).ToDictionaryAsync(Q => Q.ProjectId, Q => Q.ProjectName);
+            var allRegisteredProject = await Db.Projects.Select(Q => Q).ToDictionaryAsync(Q => Q.ProjectId, Q => Q);
 
             foreach (var item in dateRangeDict.Keys)
             {
@@ -116,14 +116,16 @@ namespace AbsensiAppWebApi.Services
 
                             totalPay += deductedPay;
 
-                            var timeStartWork = new TimeSpan(log.StartWork.GetValueOrDefault().Hour, log.StartWork.GetValueOrDefault().Minute, log.StartWork.GetValueOrDefault().Second);
-                            var timeStartBreak = new TimeSpan(log.StartBreak.GetValueOrDefault().Hour, log.StartBreak.GetValueOrDefault().Minute, log.StartBreak.GetValueOrDefault().Second);
-                            var timeEndBreak = new TimeSpan(log.EndBreak.GetValueOrDefault().Hour, log.EndBreak.GetValueOrDefault().Minute, log.EndBreak.GetValueOrDefault().Second);
-                            var timeEndWork = new TimeSpan(log.EndWork.GetValueOrDefault().Hour, log.EndWork.GetValueOrDefault().Minute, log.EndWork.GetValueOrDefault().Second);
-
                             allRegisteredProject.TryGetValue(log.ProjectId.GetValueOrDefault(), out var projectName);
 
-                            worksheet.Cell(row, 2).Value = projectName;
+                            var hourOffset = new TimeSpan(projectName.HourOffsetGmt, 0, 0);
+
+                            var timeStartWork = new TimeSpan(log.StartWork.GetValueOrDefault().Hour, log.StartWork.GetValueOrDefault().Minute, log.StartWork.GetValueOrDefault().Second).Add(hourOffset);
+                            var timeStartBreak = new TimeSpan(log.StartBreak.GetValueOrDefault().Hour, log.StartBreak.GetValueOrDefault().Minute, log.StartBreak.GetValueOrDefault().Second).Add(hourOffset);
+                            var timeEndBreak = new TimeSpan(log.EndBreak.GetValueOrDefault().Hour, log.EndBreak.GetValueOrDefault().Minute, log.EndBreak.GetValueOrDefault().Second).Add(hourOffset);
+                            var timeEndWork = new TimeSpan(log.EndWork.GetValueOrDefault().Hour, log.EndWork.GetValueOrDefault().Minute, log.EndWork.GetValueOrDefault().Second).Add(hourOffset);
+
+                            worksheet.Cell(row, 2).Value = projectName.ProjectName;
                             worksheet.Cell(row, 3).Value = log.CreatedAt.ToString("dddd, dd MMMM yyyy", new CultureInfo("id-ID"));
                             worksheet.Cell(row, 4).Value = log.StartWork.HasValue ? $"{timeStartWork}" : "";
                             worksheet.Cell(row, 5).Value = log.StartBreak.HasValue ? $"{timeStartBreak}" : "";

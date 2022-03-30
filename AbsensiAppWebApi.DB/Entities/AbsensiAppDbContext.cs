@@ -14,14 +14,36 @@ namespace AbsensiAppWebApi.DB.Entities
         }
 
         public virtual DbSet<Blob> Blobs { get; set; }
+        public virtual DbSet<PgStatStatement> PgStatStatements { get; set; }
         public virtual DbSet<Project> Projects { get; set; }
         public virtual DbSet<ScanEnum> ScanEnums { get; set; }
         public virtual DbSet<Worker> Workers { get; set; }
         public virtual DbSet<WorkerLog> WorkerLogs { get; set; }
-        
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.HasAnnotation("Relational:Collation", "English_Indonesia.1252");
+            modelBuilder.HasPostgresExtension("btree_gin")
+                .HasPostgresExtension("btree_gist")
+                .HasPostgresExtension("citext")
+                .HasPostgresExtension("cube")
+                .HasPostgresExtension("dblink")
+                .HasPostgresExtension("dict_int")
+                .HasPostgresExtension("dict_xsyn")
+                .HasPostgresExtension("earthdistance")
+                .HasPostgresExtension("fuzzystrmatch")
+                .HasPostgresExtension("hstore")
+                .HasPostgresExtension("intarray")
+                .HasPostgresExtension("ltree")
+                .HasPostgresExtension("pg_stat_statements")
+                .HasPostgresExtension("pg_trgm")
+                .HasPostgresExtension("pgcrypto")
+                .HasPostgresExtension("pgrowlocks")
+                .HasPostgresExtension("pgstattuple")
+                .HasPostgresExtension("tablefunc")
+                .HasPostgresExtension("unaccent")
+                .HasPostgresExtension("uuid-ossp")
+                .HasPostgresExtension("xml2")
+                .HasAnnotation("Relational:Collation", "en_US.UTF-8");
 
             modelBuilder.Entity<Blob>(entity =>
             {
@@ -35,6 +57,8 @@ namespace AbsensiAppWebApi.DB.Entities
                 entity.Property(e => e.ProjectId).ValueGeneratedNever();
 
                 entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                entity.Property(e => e.HourOffsetGmt).HasDefaultValueSql("7");
 
                 entity.HasOne(d => d.Blob)
                     .WithMany(p => p.Projects)
