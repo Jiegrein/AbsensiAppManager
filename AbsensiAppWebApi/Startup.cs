@@ -45,7 +45,7 @@ namespace AbsensiAppWebApi
                 //Localhost
                 //var connectionString = IsDevelopment ? this.Configuration.GetConnectionString(nameof(AppSettings.ConnectionStrings.AbsensiAppDb)) : GetHerokuConnectionString();
                 //Heroku
-                var connectionString = GetHerokuConnectionString();
+                var connectionString = GetConnectionString();
                 options.UseNpgsql(connectionString);
             }, ServiceLifetime.Transient);
         }
@@ -76,11 +76,11 @@ namespace AbsensiAppWebApi
             });
         }
 
-        private static string GetHerokuConnectionString()
+        private static string GetConnectionString()
         {
             string connectionUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
 
-            if (string.IsNullOrEmpty(connectionUrl)) connectionUrl = "postgres://cuvejkbizdadte:0cb099653da77d31cf29b128c847a2491cb1d59004d528a8a5ad909dd2d380a0@ec2-184-73-216-48.compute-1.amazonaws.com:5432/d23g2kar9be7cb";
+            if (string.IsNullOrEmpty(connectionUrl)) connectionUrl = "postgres://aswjhrgg:fpEqWOuQ_8f1AHNLR-CLfnmy2yAZfS0F@arjuna.db.elephantsql.com/aswjhrgg";
 
             var databaseUri = new Uri(connectionUrl);
 

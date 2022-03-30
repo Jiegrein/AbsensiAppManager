@@ -40,7 +40,7 @@ namespace AbsensiAppWebApi.Services
             var worksheet = workbook.Worksheets.Add();
             var query = await GenerateExcelData(dateFrom, dateTo);
 
-            var workerThatExistInSelectedDate = query.Select(Q => Q.WorkerId).Distinct();
+            var workerThatExistInSelectedDate = query.Select(Q => Q.WorkerId).Distinct().ToList();
 
             var allWorkerData = await Db.Workers.Select(Q => Q).ToListAsync();
 
@@ -187,7 +187,7 @@ namespace AbsensiAppWebApi.Services
             {
                 if (firstLoop)
                 {
-                    if (from == to)
+                    if (from.Date == to.Date)
                     {
                         fromWeekStart = from;
                         toWeekEnd = from;
@@ -198,7 +198,7 @@ namespace AbsensiAppWebApi.Services
                         from = from.AddDays(1);
                     }
 
-                    if (from.DayOfWeek == DayOfWeek.Sunday)
+                    if (from.DayOfWeek == DayOfWeek.Saturday)
                     {
                         // If firstloop from date is friday, set fromWeekStart to from(1st date that was selected by user) and set toWeekEnd to Sunday as the last day of week
                         fromWeekStart = from;
@@ -217,9 +217,9 @@ namespace AbsensiAppWebApi.Services
                 }
                 else
                 {
-                    if (from == to)
+                    if (from.Date == to.Date)
                     {
-                        if (from.DayOfWeek == DayOfWeek.Monday)
+                        if (from.DayOfWeek == DayOfWeek.Sunday)
                         {
                             fromWeekStart = from;
                         }
@@ -232,13 +232,13 @@ namespace AbsensiAppWebApi.Services
                         from = from.AddDays(1);
                     }
 
-                    if (from.DayOfWeek == DayOfWeek.Monday)
+                    if (from.DayOfWeek == DayOfWeek.Sunday)
                     {
                         // Set fromWeekStart to the user selected From
                         fromWeekStart = from;
                         from = from.AddDays(1);
                     }
-                    else if (from.DayOfWeek == DayOfWeek.Sunday)
+                    else if (from.DayOfWeek == DayOfWeek.Saturday)
                     {
                         // set toWeekEnd to Sunday as the last day of week
                         toWeekEnd = from.AddHours(23).AddMinutes(59).AddSeconds(59);

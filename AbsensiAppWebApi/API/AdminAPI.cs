@@ -34,11 +34,7 @@ namespace AbsensiAppWebApi.API
                 //var from = TimeZoneInfo.ConvertTime(model.DateFrom, TimeZoneInfo.Utc, idZone);
                 //var to = TimeZoneInfo.ConvertTime(model.DateTo, TimeZoneInfo.Utc, idZone).AddHours(23).AddMinutes(59).AddSeconds(59);
 
-                var from = model.DateFrom;
-
-                var to = model.DateTo.AddHours(23).AddMinutes(59).AddSeconds(59);
-
-                var file = await AdminService.CreateExcel(from, to);
+                var file = await AdminService.CreateExcel(model.DateFrom, model.DateTo);
 
                 return File(file, ExcelContentType, fileName);
             }
