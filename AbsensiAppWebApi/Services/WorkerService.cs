@@ -100,11 +100,12 @@ namespace AbsensiAppWebApi.Services
                 {
                     if (sameDayLogIdExist.Select(Q => Q.ProjectId.ToString()).Contains(model.ProjectId))
                     {
+                        var sameDayLog = sameDayLogIdExist.Where(Q => Q.ProjectId.ToString() == model.ProjectId).OrderBy(Q => Q.CreatedAt).FirstOrDefault();
                         return (false, new NewLogModel()
                         {
                             LogId = "",
                             ProjectId = "",
-                            Message = "Hari ini sudah scan kerja pada jam : " + sameDayLogIdExist.FirstOrDefault().CreatedAt.Hour + ":" + sameDayLogIdExist.FirstOrDefault().CreatedAt.Minute + ":" + sameDayLogIdExist.FirstOrDefault().CreatedAt.Second,
+                            Message = "Hari ini sudah scan kerja pada jam : " + sameDayLog.CreatedAt.Hour + ":" + sameDayLog.CreatedAt.Minute + ":" + sameDayLog.CreatedAt.Second,
                         });
                     }
                 }
