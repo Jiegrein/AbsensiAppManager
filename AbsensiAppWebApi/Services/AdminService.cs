@@ -1,4 +1,5 @@
 ﻿using AbsensiAppWebApi.DB.Entities;
+using AbsensiAppWebApi.DB.Constants;
 using ClosedXML.Excel;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -118,19 +119,44 @@ namespace AbsensiAppWebApi.Services
 
                             allRegisteredProject.TryGetValue(log.ProjectId.GetValueOrDefault(), out var projectName);
 
-                            var hourOffset = new TimeSpan(projectName.HourOffsetGmt, 0, 0);
+                            var dateTimeStartWork = DateTime.MinValue;
+                            var dateTimeStartBreak = DateTime.MinValue;
+                            var dateTimeEndBreak = DateTime.MinValue;
+                            var dateTimeEndWork = DateTime.MinValue;
 
-                            var timeStartWork = new TimeSpan(log.StartWork.GetValueOrDefault().Hour, log.StartWork.GetValueOrDefault().Minute, log.StartWork.GetValueOrDefault().Second).Add(hourOffset);
-                            var timeStartBreak = new TimeSpan(log.StartBreak.GetValueOrDefault().Hour, log.StartBreak.GetValueOrDefault().Minute, log.StartBreak.GetValueOrDefault().Second).Add(hourOffset);
-                            var timeEndBreak = new TimeSpan(log.EndBreak.GetValueOrDefault().Hour, log.EndBreak.GetValueOrDefault().Minute, log.EndBreak.GetValueOrDefault().Second).Add(hourOffset);
-                            var timeEndWork = new TimeSpan(log.EndWork.GetValueOrDefault().Hour, log.EndWork.GetValueOrDefault().Minute, log.EndWork.GetValueOrDefault().Second).Add(hourOffset);
+                            switch (projectName.HourOffsetGmt)
+                            {
+                                case 8:
+                                    dateTimeStartWork = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.SpecifyKind(log.StartWork.GetValueOrDefault(), DateTimeKind.Utc), TimezoneConstants.WitaTime);
+                                    dateTimeStartBreak = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.SpecifyKind(log.StartBreak.GetValueOrDefault(), DateTimeKind.Utc), TimezoneConstants.WitaTime);
+                                    dateTimeEndBreak = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.SpecifyKind(log.EndBreak.GetValueOrDefault(), DateTimeKind.Utc), TimezoneConstants.WitaTime);
+                                    dateTimeEndWork = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.SpecifyKind(log.EndWork.GetValueOrDefault(), DateTimeKind.Utc), TimezoneConstants.WitaTime);
+                                    break;
+                                case 9:
+                                    dateTimeStartWork = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.SpecifyKind(log.StartWork.GetValueOrDefault(), DateTimeKind.Utc), TimezoneConstants.WitTime);
+                                    dateTimeStartBreak = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.SpecifyKind(log.StartBreak.GetValueOrDefault(), DateTimeKind.Utc), TimezoneConstants.WitTime);
+                                    dateTimeEndBreak = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.SpecifyKind(log.EndBreak.GetValueOrDefault(), DateTimeKind.Utc), TimezoneConstants.WitTime);
+                                    dateTimeEndWork = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.SpecifyKind(log.EndWork.GetValueOrDefault(), DateTimeKind.Utc), TimezoneConstants.WitTime);
+                                    break;
+                                default:
+                                    dateTimeStartWork = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.SpecifyKind(log.StartWork.GetValueOrDefault(), DateTimeKind.Utc), TimezoneConstants.WibTime);
+                                    dateTimeStartBreak = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.SpecifyKind(log.StartBreak.GetValueOrDefault(), DateTimeKind.Utc), TimezoneConstants.WibTime);
+                                    dateTimeEndBreak = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.SpecifyKind(log.EndBreak.GetValueOrDefault(), DateTimeKind.Utc), TimezoneConstants.WibTime);
+                                    dateTimeEndWork = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.SpecifyKind(log.EndWork.GetValueOrDefault(), DateTimeKind.Utc), TimezoneConstants.WibTime);
+                                    break;
+                            }
+
+                            var timeStartWork = new TimeSpan(dateTimeStartWork.Hour, dateTimeStartWork.Minute, dateTimeStartWork.Second);
+                            var timeStartBreak = new TimeSpan(dateTimeStartBreak.Hour, dateTimeStartBreak.Minute, dateTimeStartBreak.Second);
+                            var timeEndBreak = new TimeSpan(dateTimeEndBreak.Hour, dateTimeEndBreak.Minute, dateTimeEndBreak.Second);
+                            var timeEndWork = new TimeSpan(dateTimeEndWork.Hour, dateTimeEndWork.Minute, dateTimeEndWork.Second);
 
                             worksheet.Cell(row, 2).Value = projectName.ProjectName;
-                            worksheet.Cell(row, 3).Value = log.CreatedAt.ToString("dddd, dd MMMM yyyy", new CultureInfo("id-ID"));
-                            worksheet.Cell(row, 4).Value = log.StartWork.HasValue ? $"{timeStartWork}" : "";
-                            worksheet.Cell(row, 5).Value = log.StartBreak.HasValue ? $"{timeStartBreak}" : "";
-                            worksheet.Cell(row, 6).Value = log.EndBreak.HasValue ? $"{timeEndBreak}" : "";
-                            worksheet.Cell(row, 7).Value = log.EndWork.HasValue ? $"{timeEndWork}" : "";
+                            worksheet.Cell(row, 3).Value = log.CreatedAt.ToString(DateTimeStringFormats.FullDate, new CultureInfo("id-ID"));
+                            worksheet.Cell(row, 4).Value = log.StartWork.HasValue ? timeStartWork : "";
+                            worksheet.Cell(row, 5).Value = log.StartBreak.HasValue ? timeStartBreak : "";
+                            worksheet.Cell(row, 6).Value = log.EndBreak.HasValue ? timeEndBreak : "";
+                            worksheet.Cell(row, 7).Value = log.EndWork.HasValue ? timeEndWork : "";
 
                             worksheet.Cell(row, 8).Value = dailyPay;
                             //worksheet.Cell(row, 9).FormulaR1C1 = "ROUNDUP((RC[-5]-R1C1)*1440,0)";

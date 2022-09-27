@@ -25,6 +25,8 @@ namespace AbsensiAppWebApi.Services
         {
             var id = new Guid(model.Id);
 
+            var nowUtc = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
+
             var newWorker = new Worker()
             {
                 Id = id,
@@ -32,7 +34,7 @@ namespace AbsensiAppWebApi.Services
                 Name = model.Name,
                 WorkStatus = false,
                 BreakStatus = false,
-                CreatedAt = DateTime.Now
+                CreatedAt = nowUtc
             };
 
             Db.Workers.Add(newWorker);
@@ -75,11 +77,11 @@ namespace AbsensiAppWebApi.Services
         {
             try
             {
-                var now = DateTime.Now;
+                var nowUtc = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
 
-                var startDate = new DateTime(now.Year, now.Month, now.Day, 0, 0, 0);
+                var startDate = DateTime.SpecifyKind(new DateTime(nowUtc.Year, nowUtc.Month, nowUtc.Day, 0, 0, 0), DateTimeKind.Utc);
 
-                var endDate = new DateTime(now.Year, now.Month, now.Day, 23, 59, 59);
+                var endDate = DateTime.SpecifyKind(new DateTime(nowUtc.Year, nowUtc.Month, nowUtc.Day, 23, 59, 59), DateTimeKind.Utc);
 
                 var workerId = new Guid(model.WorkerId);
 
@@ -114,15 +116,15 @@ namespace AbsensiAppWebApi.Services
                 {
                     var name = await GetWorkerName(model.WorkerId);
 
-                    var logId = now.ToString("ddddyyyyMMddHHmmss");
+                    var logId = nowUtc.ToString("ddddyyyyMMddHHmmss");
 
                     var workerLog = new WorkerLog()
                     {
                         LogId = logId,
                         WorkerId = workerId,
-                        StartWork = now,
+                        StartWork = nowUtc,
                         ProjectId = new Guid(model.ProjectId),
-                        CreatedAt = now,
+                        CreatedAt = nowUtc,
                         CreatedBy = name,
                     };
 
@@ -186,7 +188,7 @@ namespace AbsensiAppWebApi.Services
 
                 if (workerLog != null)
                 {
-                    var now = DateTime.Now;
+                    var nowUtc = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
 
                     var worker = await Db.Workers
                         .Where(Q => Q.Id == workerId)
@@ -195,28 +197,28 @@ namespace AbsensiAppWebApi.Services
 
                     if (scanId == (int)DB.Enums.ScanEnums.StartBreak)
                     {
-                        workerLog.StartBreak = now;
+                        workerLog.StartBreak = nowUtc;
 
                         worker.WorkStatus = true;
                         worker.BreakStatus = true;
                     }
                     else if (scanId == (int)DB.Enums.ScanEnums.EndBreak)
                     {
-                        workerLog.EndBreak = now;
+                        workerLog.EndBreak = nowUtc;
 
                         worker.WorkStatus = true;
                         worker.BreakStatus = false;
                     }
                     else if (scanId == (int)DB.Enums.ScanEnums.EndWork)
                     {
-                        workerLog.EndWork = now;
+                        workerLog.EndWork = nowUtc;
 
                         worker.WorkStatus = false;
                         worker.BreakStatus = false;
                     }
                     else return (false, "");
 
-                    workerLog.UpdatedAt = now;
+                    workerLog.UpdatedAt = nowUtc;
                     workerLog.UpdatedBy = name;
                     Db.Update(workerLog);
                     await Db.SaveChangesAsync();
