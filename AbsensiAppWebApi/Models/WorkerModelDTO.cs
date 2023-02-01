@@ -1,15 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 
-namespace AbsensiAppWebApi.DB.Entities
+namespace AbsensiAppWebApi.Models
 {
-    public partial class Worker
+    public class WorkerModelDTO
     {
-        public Worker()
-        {
-            WorkerLogs = new HashSet<WorkerLog>();
-        }
-
         public Guid Id { get; set; }
         public string Fullname { get; set; }
         public string Name { get; set; }
@@ -19,7 +13,6 @@ namespace AbsensiAppWebApi.DB.Entities
         public DateTime? UpdatedAt { get; set; }
         public decimal DailyPay { get; set; }
         public string Phone { get; set; }
-
-        public virtual ICollection<WorkerLog> WorkerLogs { get; set; }
+        public string Token { get; set; }
     }
 }
