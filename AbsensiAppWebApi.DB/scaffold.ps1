@@ -1,6 +1,6 @@
 $dataSource = "localhost";
 $port = "5432";
-$initialCatalog = "1. Heroku";
+$initialCatalog = "AbsensiWebApiMigration";
 $userId = "postgres";
 $password = "admin";
 $provider = "Npgsql.EntityFrameworkCore.PostgreSQL";
