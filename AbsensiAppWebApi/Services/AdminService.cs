@@ -15,7 +15,7 @@ namespace AbsensiAppWebApi.Services
     {
         public AbsensiAppDbContext Db { get; set; }
         private readonly string BlobRootPath;
-
+        private readonly DateTime StartsAt = new(2023, 07, 16, 23, 59, 59);
         public AdminService(AbsensiAppDbContext dbcontext)
         {
             this.Db = dbcontext;
@@ -99,7 +99,8 @@ namespace AbsensiAppWebApi.Services
                         worksheet.Cell(row, 8).Value = "Gaji per hari";
                         worksheet.Cell(row, 9).Value = "Penalti keterlambatan";
                         worksheet.Cell(row, 10).Value = "Total gaji per hari";
-                        worksheet.Cell(row, 11).Value = "Insentif";
+                        if (DateTime.UtcNow > StartsAt)
+                            worksheet.Cell(row, 11).Value = "Insentif";
                         row++;
 
                         foreach (var log in data)
@@ -163,7 +164,8 @@ namespace AbsensiAppWebApi.Services
                             //worksheet.Cell(row, 9).FormulaR1C1 = "ROUNDUP((RC[-5]-R1C1)*1440,0)";
                             worksheet.Cell(row, 9).FormulaR1C1 = "=ROUND((IF(ROUNDUP((RC[-5]-R1C1)*1440,0) > 5, ROUNDUP((RC[-5]-R1C1)*1440,0), 0) + IF(ROUNDUP((RC[-3]-R1C3)*1440,0) > 5, ROUNDUP((RC[-3]-R1C3)*1440,0), 0) + IF(ROUNDUP((RC[-2]-R1C4)*1440,0) < -5, -ROUNDUP((RC[-2]-R1C4)*1440,0), 0)) * (RC[-1] / 480), 0)";
                             worksheet.Cell(row, 10).FormulaR1C1 = "RC[-2]-RC[-1]";
-                            worksheet.Cell(row, 11).Value = new TimeSpan(8, 0, 0) > timeStartWork ? 3000 : 0;
+                            if (DateTime.UtcNow > StartsAt)
+                                worksheet.Cell(row, 11).Value = new TimeSpan(8, 0, 0) > timeStartWork ? 3000 : 0;
 
                             row++;
                         }
@@ -175,7 +177,8 @@ namespace AbsensiAppWebApi.Services
                         var dataCount = data.Count;
 
                         worksheet.Cell(row, 10).FormulaR1C1 = $"SUM(R[-{data.Count}]C:R[-1]C)";
-                        worksheet.Cell(row, 11).FormulaR1C1 = $"SUM(R[-{data.Count}]C:R[-1]C)";
+                        if (DateTime.UtcNow > StartsAt)
+                            worksheet.Cell(row, 11).FormulaR1C1 = $"SUM(R[-{data.Count}]C:R[-1]C)";
                         row += 2;
                     }
                 }
