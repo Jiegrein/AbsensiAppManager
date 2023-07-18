@@ -16,6 +16,7 @@ namespace AbsensiAppWebApi.Services
         public AbsensiAppDbContext Db { get; set; }
         private readonly string BlobRootPath;
         private readonly DateTime StartsAt = new(2023, 07, 16, 23, 59, 59);
+        private readonly Guid? RestiId = Guid.Parse("05a33787-8684-40eb-9c8c-317d107b4f03");
         public AdminService(AbsensiAppDbContext dbcontext)
         {
             this.Db = dbcontext;
@@ -76,6 +77,13 @@ namespace AbsensiAppWebApi.Services
                 foreach (var workerId in workerThatExistInSelectedDate)
                 {
                     var data = query.Where(Q => Q.WorkerId == workerId && Q.CreatedAt >= from && Q.CreatedAt <= to).ToList();
+                    var insentifTimeStart = new TimeSpan(8, 0, 0);
+                    var insentifTimeEnd = new TimeSpan(17, 0, 0);
+                    //if (workerId == RestiId)
+                    //{
+                    //    insentifTimeStart = new TimeSpan(9, 0, 0);
+                    //    insentifTimeEnd = new TimeSpan(16, 30, 0);
+                    //}
 
                     if (data.Count > 0)
                     {
@@ -167,9 +175,11 @@ namespace AbsensiAppWebApi.Services
                             if (DateTime.UtcNow > StartsAt)
                             {
                                 var gotBonus = true;
-                                if (new TimeSpan(8, 0, 0) < timeStartWork)
+                                if (insentifTimeStart < timeStartWork)
                                     gotBonus = false;
-                                if (!log.EndWork.HasValue || new TimeSpan(17, 0, 0) > timeEndWork)
+                                else if (!log.EndWork.HasValue || insentifTimeEnd > timeEndWork)
+                                    gotBonus = false;
+                                else if (workerId == RestiId)
                                     gotBonus = false;
                                 worksheet.Cell(row, 11).Value = gotBonus ? 3500 : 0;
                             }
