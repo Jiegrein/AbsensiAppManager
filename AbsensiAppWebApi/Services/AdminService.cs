@@ -165,7 +165,14 @@ namespace AbsensiAppWebApi.Services
                             worksheet.Cell(row, 9).FormulaR1C1 = "=ROUND((IF(ROUNDUP((RC[-5]-R1C1)*1440,0) > 5, ROUNDUP((RC[-5]-R1C1)*1440,0), 0) + IF(ROUNDUP((RC[-3]-R1C3)*1440,0) > 5, ROUNDUP((RC[-3]-R1C3)*1440,0), 0) + IF(ROUNDUP((RC[-2]-R1C4)*1440,0) < -5, -ROUNDUP((RC[-2]-R1C4)*1440,0), 0)) * (RC[-1] / 480), 0)";
                             worksheet.Cell(row, 10).FormulaR1C1 = "RC[-2]-RC[-1]";
                             if (DateTime.UtcNow > StartsAt)
-                                worksheet.Cell(row, 11).Value = new TimeSpan(8, 0, 0) > timeStartWork ? 3000 : 0;
+                            {
+                                var gotBonus = true;
+                                if (new TimeSpan(8, 0, 0) < timeStartWork)
+                                    gotBonus = false;
+                                if (!log.EndWork.HasValue || new TimeSpan(17, 0, 0) > timeEndWork)
+                                    gotBonus = false;
+                                worksheet.Cell(row, 11).Value = gotBonus ? 3500 : 0;
+                            }
 
                             row++;
                         }
