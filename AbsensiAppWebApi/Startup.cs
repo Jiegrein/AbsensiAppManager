@@ -102,7 +102,7 @@ namespace AbsensiAppWebApi
         {
             string connectionUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
 
-            if (string.IsNullOrEmpty(connectionUrl)) connectionUrl = "postgres://aswjhrgg:fpEqWOuQ_8f1AHNLR-CLfnmy2yAZfS0F@arjuna.db.elephantsql.com/aswjhrgg";
+            if (string.IsNullOrEmpty(connectionUrl)) connectionUrl = "postgresql://u_0abee8d3_fd67_42c2_93d0_1b01e83209cb:Sa735nh4Le79c45OofrB6QVi9S7uvOqgl31h6u3jfyklj5y9j424@pg.rapidapp.io:5433/db_0abee8d3_fd67_42c2_93d0_1b01e83209cb?ssl=true&application_name=rapidapp_nodejs";
 
             var uri = new Uri(connectionUrl);
             var db = uri.AbsolutePath.Trim('/');
