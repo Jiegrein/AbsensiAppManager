@@ -1,4 +1,5 @@
 using System;
+using System.Data.Common;
 using System.Web;
 using Microsoft.Extensions.Configuration;
 using Npgsql;
@@ -6,10 +7,11 @@ using Npgsql;
 namespace AbsensiAppWebApi.Infrastructure;
 
 /// <summary>
-/// Resolves the PostgreSQL connection string from configuration. The <c>DATABASE_URL</c> setting
-/// (URL form, e.g. <c>postgresql://user:pass@host/db?sslmode=require</c>, as issued by Neon) takes
-/// precedence; <c>ConnectionStrings:AbsensiAppDb</c> (key/value form) is the local-development fallback.
-/// There is deliberately no hardcoded default: a missing setting fails fast at startup.
+/// Resolves the PostgreSQL connection string from configuration. The <c>DATABASE_URL</c> setting takes
+/// precedence and accepts either form Neon hands out: the libpq URL
+/// (<c>postgresql://user:pass@host/db?sslmode=require</c>) or the .NET key/value string
+/// (<c>Host=...;Username=...;SSL Mode=VerifyFull</c>). <c>ConnectionStrings:AbsensiAppDb</c> is the
+/// local-development fallback. There is deliberately no hardcoded default: a missing setting fails fast.
 /// </summary>
 public static class DatabaseConnectionStringResolver
 {
@@ -17,23 +19,41 @@ public static class DatabaseConnectionStringResolver
     public const string ConnectionStringName = "AbsensiAppDb";
     private const int DefaultPostgresPort = 5432;
 
+    // Keywords Neon includes that Npgsql 6 does not recognise; it throws on unknown keys.
+    // Channel binding is negotiated automatically by Npgsql when TLS is on, so dropping it is safe.
+    private static readonly string[] UnsupportedKeywords = { "Channel Binding" };
+
     public static string Resolve(IConfiguration configuration)
     {
         var databaseUrl = configuration[DatabaseUrlKey];
         if (!string.IsNullOrWhiteSpace(databaseUrl))
         {
-            return FromDatabaseUrl(databaseUrl);
+            return IsUrlForm(databaseUrl) ? FromDatabaseUrl(databaseUrl) : FromKeyValue(databaseUrl);
         }
 
         var connectionString = configuration.GetConnectionString(ConnectionStringName);
         if (!string.IsNullOrWhiteSpace(connectionString))
         {
-            return connectionString;
+            return FromKeyValue(connectionString);
         }
 
         throw new InvalidOperationException(
             $"No database configured. Set the '{DatabaseUrlKey}' environment variable " +
             $"or 'ConnectionStrings:{ConnectionStringName}' in appsettings.");
+    }
+
+    private static bool IsUrlForm(string value) =>
+        value.StartsWith("postgres://", StringComparison.OrdinalIgnoreCase) ||
+        value.StartsWith("postgresql://", StringComparison.OrdinalIgnoreCase);
+
+    private static string FromKeyValue(string connectionString)
+    {
+        var builder = new DbConnectionStringBuilder { ConnectionString = connectionString.Trim().Trim('"') };
+        foreach (var keyword in UnsupportedKeywords)
+        {
+            builder.Remove(keyword);
+        }
+        return new NpgsqlConnectionStringBuilder(builder.ConnectionString).ConnectionString;
     }
 
     private static string FromDatabaseUrl(string databaseUrl)

@@ -1,8 +1,8 @@
-$dataSource = "localhost";
+$dataSource = "ep-bitter-queen-b3amtxyx-pooler.c-4.ap-southeast-1.aws.neon.tech";
 $port = "5432";
 $initialCatalog = "AbsensiWebApiMigration";
-$userId = "postgres";
-$password = "admin";
+$userId = "neondb_owner";
+$password = "npg_2yl4nqWtLhZP";
 $provider = "Npgsql.EntityFrameworkCore.PostgreSQL";
 $entityFolderPath = "Entities";
 
