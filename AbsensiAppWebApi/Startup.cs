@@ -1,4 +1,6 @@
 using AbsensiAppWebApi.DB.Entities;
+using AbsensiAppWebApi.DB.Migrations;
+using AbsensiAppWebApi.Infrastructure;
 using AbsensiAppWebApi.Models;
 using AbsensiAppWebApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -61,14 +63,13 @@ namespace AbsensiAppWebApi
                     ValidateIssuerSigningKey = true
                 };
             });
-            services.AddDbContext<AbsensiAppDbContext>(options =>
-            {
-                //Localhost
-                //var connectionString = IsDevelopment ? this.Configuration.GetConnectionString(nameof(AppSettings.ConnectionStrings.AbsensiAppDb)) : GetHerokuConnectionString();
-                //Heroku
-                var connectionString = GetConnectionString();
-                options.UseNpgsql(connectionString);
-            }, ServiceLifetime.Transient);
+            var connectionString = DatabaseConnectionStringResolver.Resolve(Configuration);
+            services.AddDbContext<AbsensiAppDbContext>(
+                options => options.UseNpgsql(connectionString),
+                ServiceLifetime.Transient);
+
+            services.AddSingleton<ISqlScriptSource, EmbeddedSqlScriptSource>();
+            services.AddTransient<IDatabaseMigrator, SqlScriptMigrator>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -98,22 +99,6 @@ namespace AbsensiAppWebApi
             {
                 endpoints.MapControllers();
             });
-        }
-
-        private static string GetConnectionString()
-        {
-            string connectionUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
-
-            if (string.IsNullOrEmpty(connectionUrl)) connectionUrl = "postgresql://u_0abee8d3_fd67_42c2_93d0_1b01e83209cb:Sa735nh4Le79c45OofrB6QVi9S7uvOqgl31h6u3jfyklj5y9j424@pg.rapidapp.io:5433/db_0abee8d3_fd67_42c2_93d0_1b01e83209cb?ssl=true&application_name=rapidapp_nodejs";
-
-            var uri = new Uri(connectionUrl);
-            var db = uri.AbsolutePath.Trim('/');
-            var user = uri.UserInfo.Split(':')[0];
-            var passwd = uri.UserInfo.Split(':')[1];
-            var port = uri.Port > 0 ? uri.Port : 5432;
-            var connStr = string.Format("Server={0};Database={1};User Id={2};Password={3};Port={4};Pooling=true;SSL Mode=Require;Trust Server Certificate=True;",
-                uri.Host, db, user, passwd, port);
-            return connStr;
         }
     }
 }
