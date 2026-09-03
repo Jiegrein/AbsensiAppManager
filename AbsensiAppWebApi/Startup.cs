@@ -82,9 +82,11 @@ namespace AbsensiAppWebApi
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "AbsensiAppWebApi v1"));
             }
+
+            // Swagger is exposed on every environment so the API can be explored on dev and prod alike.
+            app.UseSwagger();
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "AbsensiAppWebApi v1"));
 
             app.UseHttpsRedirection();
 
