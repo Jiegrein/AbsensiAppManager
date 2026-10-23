@@ -117,10 +117,24 @@ public class ApiContractTests(ApiFixture fixture)
     }
 
     [Fact]
-    public async Task Payroll_export_is_anonymous_and_returns_an_xlsx_attachment()
+    public async Task Payroll_export_requires_the_admin_key_header()
     {
-        // Pinned as-is: the admin export has no [Authorize]; anyone with the URL can pull payroll.
         var client = fixture.CreateClient();
+        var body = new { dateFrom = "2026-08-03T00:00:00Z", dateTo = "2026-08-09T23:59:59Z" };
+
+        var missing = await client.PostAsJsonAsync("/api/v1/admin/get-data-between-date", body);
+        Assert.Equal(HttpStatusCode.Unauthorized, missing.StatusCode);
+
+        client.DefaultRequestHeaders.Add("X-Admin-Key", "wrong-key");
+        var wrong = await client.PostAsJsonAsync("/api/v1/admin/get-data-between-date", body);
+        Assert.Equal(HttpStatusCode.Unauthorized, wrong.StatusCode);
+    }
+
+    [Fact]
+    public async Task Payroll_export_with_the_admin_key_returns_an_xlsx_attachment()
+    {
+        var client = fixture.CreateClient();
+        client.DefaultRequestHeaders.Add("X-Admin-Key", ApiFixture.AdminKey);
 
         var response = await client.PostAsJsonAsync("/api/v1/admin/get-data-between-date", new { dateFrom = "2026-08-03T00:00:00Z", dateTo = "2026-08-09T23:59:59Z" });
 

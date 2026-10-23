@@ -21,6 +21,8 @@ public sealed class ApiFixture : WebApplicationFactory<Program>, IAsyncLifetime
         .WithImage("postgres:17-alpine")
         .Build();
 
+    public const string AdminKey = "test-admin-key-0123456789";
+
     /// <summary>Seeded by "3. Seeding for testing.sql".</summary>
     public static readonly Guid CikandeProjectId = Guid.Parse("142554ad-1df6-4902-a29a-3e948a706b6f");
 
@@ -29,6 +31,7 @@ public sealed class ApiFixture : WebApplicationFactory<Program>, IAsyncLifetime
         await postgres.StartAsync();
         // Startup resolves the database from configuration; CreateDefaultBuilder reads this variable.
         Environment.SetEnvironmentVariable("DATABASE_URL", postgres.GetConnectionString());
+        Environment.SetEnvironmentVariable("Admin__Key", AdminKey);
         using var scope = Services.CreateScope();
         await scope.ServiceProvider.GetRequiredService<IDatabaseMigrator>().MigrateAsync();
     }

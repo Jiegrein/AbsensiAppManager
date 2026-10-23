@@ -3,6 +3,7 @@ using System;
 using System.Threading.Tasks;
 using AbsensiAppWebApi.Services;
 using AbsensiAppWebApi.Models;
+using AbsensiAppWebApi.Infrastructure;
 using System.Net;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -11,6 +12,7 @@ namespace AbsensiAppWebApi.API
 {
     [Route("api/v1/admin")]
     [ApiController]
+    [AdminKey]
     public class AdminAPI : ControllerBase
     {
         public AdminService AdminService { get; set; }

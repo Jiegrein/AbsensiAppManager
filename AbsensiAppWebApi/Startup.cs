@@ -14,6 +14,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace AbsensiAppWebApi
@@ -41,6 +42,17 @@ namespace AbsensiAppWebApi
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "AbsensiAppWebApi", Version = "v1" });
+                c.AddSecurityDefinition("AdminKey", new OpenApiSecurityScheme
+                {
+                    Type = SecuritySchemeType.ApiKey,
+                    In = ParameterLocation.Header,
+                    Name = AdminKeyAttribute.HeaderName,
+                    Description = "Admin key for the payroll export (App Service setting Admin__Key).",
+                });
+                c.AddSecurityRequirement(document => new OpenApiSecurityRequirement
+                {
+                    [new OpenApiSecuritySchemeReference("AdminKey", document)] = new List<string>(),
+                });
             });
 
             services.AddTransient<WorkerService>();
