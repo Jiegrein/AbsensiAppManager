@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using System.Threading.Tasks;
 using AbsensiAppWebApi.DB.Entities;
 using AbsensiAppWebApi.DB.Migrations;
@@ -30,9 +29,6 @@ public sealed class ApiFixture : WebApplicationFactory<Program>, IAsyncLifetime
         await postgres.StartAsync();
         // Startup resolves the database from configuration; CreateDefaultBuilder reads this variable.
         Environment.SetEnvironmentVariable("DATABASE_URL", postgres.GetConnectionString());
-        // AdminService.CreateExcel writes a copy under the temp folder and does not create the directory.
-        Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), "temp", "excel"));
-
         using var scope = Services.CreateScope();
         await scope.ServiceProvider.GetRequiredService<IDatabaseMigrator>().MigrateAsync();
     }
